@@ -102,7 +102,7 @@ class _LoginPageState extends State<LoginPage> {
 
     // Set font size and padding based on the screen width
     double fontSize =
-        screenWidth < 600 ? 16.0 : 18.0; // Smaller font for narrow screens
+        screenWidth < 600 ? 14.0 : 18.0; // Smaller font for narrow screens
     double padding =
         screenWidth < 600 ? 12.0 : 16.0; // Smaller padding for narrow screens
     double avatarSize = screenWidth < 600
@@ -122,12 +122,18 @@ class _LoginPageState extends State<LoginPage> {
             child: const Icon(Icons.school, size: 30, color: Colors.green),
           ),
           SizedBox(width: spacing), // Responsive spacing
-          Text(
-            'Pamantasan ng Lungsod ng San Pablo',
-            style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+
+          // Expanding the text to prevent overflow
+          Expanded(
+            child: Text(
+              'Pamantasan ng Lungsod ng San Pablo',
+              style: TextStyle(
+                fontSize: fontSize,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+              maxLines: 1, // Restrict to one line
+              overflow: TextOverflow.ellipsis, // Add ellipsis if text overflows
             ),
           ),
         ],
@@ -221,7 +227,7 @@ class StudentDashboardState extends State<StudentDashboard> {
 
     // Set font size, padding, avatar size, and spacing based on the screen width
     double fontSize =
-        screenWidth < 600 ? 16.0 : 18.0; // Smaller font for narrow screens
+        screenWidth < 600 ? 14.0 : 18.0; // Smaller font for narrow screens
     double padding =
         screenWidth < 600 ? 12.0 : 16.0; // Smaller padding for narrow screens
     double avatarSize = screenWidth < 600
@@ -305,7 +311,7 @@ class StudentDashboardState extends State<StudentDashboard> {
           CircleAvatar(
             radius: 40,
             backgroundColor: Colors.grey[300],
-            child: const Icon(Icons.person, size: 50, color: Colors.white),
+            child: const Icon(Icons.person, size: 50, color: Colors.green),
           ),
           const SizedBox(width: 16.0),
           const Column(
@@ -320,7 +326,7 @@ class StudentDashboardState extends State<StudentDashboard> {
               ),
               SizedBox(height: 8.0),
               Text(
-                'Student ID: 123345',
+                'Student ID: 12-345',
                 style: TextStyle(
                   fontSize: 16.0,
                   color: Colors.black,
@@ -483,33 +489,55 @@ class ViewGradeDetails extends StatelessWidget {
 
   // Reuse the header from the main window
   Widget buildHeader(BuildContext context) {
+    // Get the screen width
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    // Set font size, padding, and avatar size based on the screen width
+    double fontSize =
+        screenWidth < 600 ? 14.0 : 18.0; // Smaller font for narrow screens
+    double padding =
+        screenWidth < 600 ? 12.0 : 16.0; // Adjust padding for narrow screens
+    double avatarSize = screenWidth < 600
+        ? 25.0
+        : 30.0; // Adjust avatar size for narrow screens
+    double iconSize = screenWidth < 600 ? 24.0 : 30.0; // Adjust icon size
+
     return Container(
       color: const Color(0xFF266A2D),
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(padding), // Responsive padding
       child: Row(
         children: [
           // Back button
           IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+            icon: Icon(Icons.arrow_back_ios,
+                color: Colors.white, size: iconSize), // Responsive icon size
             onPressed: () {
               Navigator.pop(context); // Go back to the previous screen
             },
           ),
-          const SizedBox(width: 16.0),
+          SizedBox(
+              width: screenWidth < 600 ? 12.0 : 16.0), // Responsive spacing
 
-          // Logo and university name
-          const CircleAvatar(
-            radius: 30,
+          // Logo
+          CircleAvatar(
+            radius: avatarSize, // Responsive avatar size
             backgroundColor: Colors.white,
-            child: Icon(Icons.school, size: 30, color: Colors.green),
+            child: Icon(Icons.school,
+                size: iconSize, color: Colors.green), // Responsive icon size
           ),
-          const SizedBox(width: 16.0),
-          const Text(
-            'Pamantasan ng Lungsod ng San Pablo',
-            style: TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+          SizedBox(
+              width: screenWidth < 600 ? 12.0 : 16.0), // Responsive spacing
+
+          // University name with responsive font size
+          Expanded(
+            child: Text(
+              'Pamantasan ng Lungsod ng San Pablo',
+              style: TextStyle(
+                fontSize: fontSize, // Responsive font size
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+              overflow: TextOverflow.ellipsis, // Handles text overflow
             ),
           ),
         ],
@@ -838,7 +866,7 @@ class CourseDetails extends StatelessWidget {
 
     // Set font size and padding based on the screen width
     double fontSize =
-        screenWidth < 600 ? 16.0 : 18.0; // Smaller font for narrow screens
+        screenWidth < 600 ? 14.0 : 18.0; // Smaller font for narrow screens
     double padding =
         screenWidth < 600 ? 12.0 : 16.0; // Smaller padding for narrow screens
 
