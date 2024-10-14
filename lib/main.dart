@@ -152,6 +152,7 @@ class StudentDashboard extends StatefulWidget {
 class StudentDashboardState extends State<StudentDashboard> {
   final ScrollController _gradeScrollController = ScrollController();
   final ScrollController _courseScrollController = ScrollController();
+  final ScrollController _archivedScrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -211,6 +212,21 @@ class StudentDashboardState extends State<StudentDashboard> {
                       builder: (context) => CourseDetails(title: title),
                     ),
                   );
+                },
+              ),
+              // Archived Classes Section
+              buildSectionWithArrows(
+                title: 'Archived Classes:',
+                scrollController: _archivedScrollController,
+                items: [
+                  'History of Art',
+                  'Introduction to Psychology',
+                  'Ethics in Technology',
+                  'Web Design Basics',
+                  'Digital Marketing Strategies',
+                ],
+                onTilePressed: (title) {
+                  // Add your action for when an archived class tile is pressed
                 },
               ),
             ],
@@ -500,7 +516,10 @@ class ViewGradeDetails extends StatelessWidget {
     double avatarSize = screenWidth < 600
         ? 25.0
         : 30.0; // Adjust avatar size for narrow screens
-    double iconSize = screenWidth < 600 ? 24.0 : 30.0; // Adjust icon size
+    double iconSize = screenWidth < 600 ? 15.0 : 24.0; // Adjust icon size
+    double logoIconSize = screenWidth < 600
+        ? 20.0
+        : 30.0; // Adjust the size of the logo icon inside the CircleAvatar
 
     return Container(
       color: const Color(0xFF266A2D),
@@ -523,7 +542,8 @@ class ViewGradeDetails extends StatelessWidget {
             radius: avatarSize, // Responsive avatar size
             backgroundColor: Colors.white,
             child: Icon(Icons.school,
-                size: iconSize, color: Colors.green), // Responsive icon size
+                size: logoIconSize,
+                color: Colors.green), // Responsive icon size
           ),
           SizedBox(
               width: screenWidth < 600 ? 12.0 : 16.0), // Responsive spacing
@@ -637,159 +657,6 @@ class CourseTile extends StatelessWidget {
   }
 }
 
-class ModuleTileSection extends StatefulWidget {
-  final List<String> modules;
-
-  const ModuleTileSection({super.key, required this.modules});
-
-  @override
-  ModuleTileSectionState createState() => ModuleTileSectionState();
-}
-
-class ModuleTileSectionState extends State<ModuleTileSection> {
-  late PageController _pageController;
-  int _currentPage = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController(initialPage: _currentPage);
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose(); // Dispose the controller when no longer needed
-    super.dispose();
-  }
-
-  void _nextPage() {
-    if (_currentPage < widget.modules.length - 1) {
-      _currentPage++;
-      _pageController.animateToPage(
-        _currentPage,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-      setState(() {}); // Update state to reflect current page
-    }
-  }
-
-  void _previousPage() {
-    if (_currentPage > 0) {
-      _currentPage--;
-      _pageController.animateToPage(
-        _currentPage,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-      setState(() {}); // Update state to reflect current page
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-          horizontal: 16.0), // Add horizontal padding
-      child: SizedBox(
-        height: 150, // Adjust height to align with arrow buttons
-        child: PageView.builder(
-          controller: _pageController,
-          itemCount: widget.modules.length,
-          itemBuilder: (context, index) {
-            return ModuleTile(
-              moduleTitle: widget.modules[index],
-              onNext: _nextPage,
-              onPrevious: _previousPage,
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-class ModuleTile extends StatelessWidget {
-  final String moduleTitle;
-  final VoidCallback onNext;
-  final VoidCallback onPrevious;
-
-  const ModuleTile({
-    super.key,
-    required this.moduleTitle,
-    required this.onNext,
-    required this.onPrevious,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 50.0, vertical: 140.0),
-      child: Container(
-        width: 100,
-        height: 100,
-        decoration: BoxDecoration(
-          color: const Color(0xFF266A2D), // Background color
-          borderRadius: BorderRadius.circular(12.0), // Slightly rounded corners
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black26,
-              offset: Offset(2, 2),
-              blurRadius: 6.0,
-            ),
-          ],
-        ),
-        child: Stack(
-          alignment: Alignment.center, // Align content to the center
-          children: [
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(
-                    8.0), // Consistent padding with semester tile
-                child: Text(
-                  moduleTitle,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold, // Use bold for emphasis
-                  ),
-                ),
-              ),
-            ),
-            // Left Arrow Button
-            Positioned(
-              left: 8.0,
-              child: ClipOval(
-                child: Material(
-                  color: Colors.transparent,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                    onPressed: onPrevious,
-                  ),
-                ),
-              ),
-            ),
-            // Right Arrow Button
-            Positioned(
-              right: 8.0,
-              child: ClipOval(
-                child: Material(
-                  color: Colors.transparent,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_forward_ios,
-                        color: Colors.white),
-                    onPressed: onNext,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class CourseDetails extends StatelessWidget {
   final String title;
@@ -798,30 +665,82 @@ class CourseDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Example list of modules
     final List<String> modules =
         List.generate(10, (index) => 'Module ${index + 1}');
+
+    Widget buildSectionWithArrows({
+      required ScrollController scrollController,
+      required List<String> items,
+      required Function(String)? onTilePressed,
+    }) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 150,
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back_ios),
+                  onPressed: () {
+                    scrollController.animateTo(
+                      scrollController.offset - 150,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.ease,
+                    );
+                  },
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    controller: scrollController,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: onTilePressed != null
+                            ? () => onTilePressed(items[index])
+                            : null,
+                        child: SemesterTile(items[index]),
+                      );
+                    },
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.arrow_forward_ios),
+                  onPressed: () {
+                    scrollController.animateTo(
+                      scrollController.offset + 150,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.ease,
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    final ScrollController moduleScrollController = ScrollController();
 
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            // Retain the header
             buildHeader(context),
 
-            // Course Name
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 24.0, // Larger font size
+                  fontSize: 24.0,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
 
-            // Instructor's name and profile logo
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -829,7 +748,7 @@ class CourseDetails extends StatelessWidget {
                   radius: 20,
                   backgroundColor: Colors.grey[300],
                   child:
-                      const Icon(Icons.person, size: 20, color: Colors.white),
+                      const Icon(Icons.person, size: 20, color: Colors.green),
                 ),
                 const SizedBox(width: 8.0),
                 const Text(
@@ -841,18 +760,19 @@ class CourseDetails extends StatelessWidget {
 
             // Learning materials title
             const Padding(
-              padding:
-                  EdgeInsets.only(top: 16.0, bottom: 8.0), // Adjusted padding
+              padding: EdgeInsets.only(
+                  top: 16.0, bottom: 0.0), // Reduced bottom padding
               child: Text(
                 'Learning Materials:',
                 style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
               ),
             ),
-
-            // Learning materials (modules)
-            Expanded(
-              child: ModuleTileSection(modules: modules),
-            ),
+            const SizedBox(height: 16.0),
+            buildSectionWithArrows(
+              scrollController: moduleScrollController,
+              items: modules,
+              onTilePressed: (title) {},
+            )
           ],
         ),
       ),
@@ -861,38 +781,36 @@ class CourseDetails extends StatelessWidget {
 
   // Reuse the header from the main window
   Widget buildHeader(BuildContext context) {
-    // Get the screen width
     double screenWidth = MediaQuery.of(context).size.width;
-
-    // Set font size and padding based on the screen width
-    double fontSize =
-        screenWidth < 600 ? 14.0 : 18.0; // Smaller font for narrow screens
-    double padding =
-        screenWidth < 600 ? 12.0 : 16.0; // Smaller padding for narrow screens
+    double fontSize = screenWidth < 600 ? 14.0 : 18.0;
+    double padding = screenWidth < 600 ? 12.0 : 16.0;
+    double iconSize = screenWidth < 600 ? 20.0 : 24.0;
+    double iconPadding = screenWidth < 600 ? 4.0 : 8.0;
+    double logoSize = screenWidth < 600 ? 20.0 : 30.0;
+    double logoIconSize = screenWidth < 600 ? 20.0 : 30.0;
 
     return Container(
       color: const Color(0xFF266A2D),
       padding: EdgeInsets.all(padding),
       child: Row(
         children: [
-          // Back button
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-            onPressed: () {
-              Navigator.pop(context); // Go back to the previous screen
-            },
+          Padding(
+            padding: EdgeInsets.all(iconPadding),
+            child: IconButton(
+              iconSize: iconSize,
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
           ),
-          const SizedBox(width: 8.0), // Adjusted spacing
-
-          // Logo and university name
-          const CircleAvatar(
-            radius: 30,
+          const SizedBox(width: 8.0),
+          CircleAvatar(
+            radius: logoSize,
             backgroundColor: Colors.white,
-            child: Icon(Icons.school, size: 30, color: Colors.green),
+            child: Icon(Icons.school, size: logoIconSize, color: Colors.green),
           ),
-          const SizedBox(width: 8.0), // Adjusted spacing
-
-          // University name with ellipsis when text overflows
+          const SizedBox(width: 8.0),
           Expanded(
             child: Text(
               'Pamantasan ng Lungsod ng San Pablo',
@@ -901,8 +819,7 @@ class CourseDetails extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
-              overflow:
-                  TextOverflow.ellipsis, // Add ellipsis when text overflows
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
