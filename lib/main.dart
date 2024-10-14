@@ -625,7 +625,7 @@ class ModuleTileSectionState extends State<ModuleTileSection> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(viewportFraction: 0.3); // Adjust the viewport fraction for three tiles
+    _pageController = PageController(initialPage: _currentPage);
   }
 
   @override
@@ -635,7 +635,7 @@ class ModuleTileSectionState extends State<ModuleTileSection> {
   }
 
   void _nextPage() {
-    if (_currentPage < (widget.modules.length / 3).ceil() - 1) {
+    if (_currentPage < widget.modules.length - 1) {
       _currentPage++;
       _pageController.animateToPage(
         _currentPage,
@@ -661,52 +661,21 @@ class ModuleTileSectionState extends State<ModuleTileSection> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Column(
-        children: [
-          SizedBox(
-            height: 150, // Adjust height to align with arrow buttons
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: (widget.modules.length / 3).ceil(), // Number of pages based on the number of tiles
-              itemBuilder: (context, index) {
-                // Create a row of three tiles for each page
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(3, (tileIndex) {
-                    final moduleIndex = index * 3 + tileIndex; // Calculate the module index
-                    if (moduleIndex < widget.modules.length) {
-                      return ModuleTile(
-                        moduleTitle: widget.modules[moduleIndex],
-                        onNext: _nextPage,
-                        onPrevious: _previousPage,
-                      );
-                    }
-                    return const SizedBox.shrink(); // Return an empty widget if there are no more modules
-                  }),
-                );
-              },
-            ),
-          ),
-          // Navigation Arrows
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-                  onPressed: _previousPage,
-                ),
-              ),
-              Expanded(
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_forward_ios, color: Colors.black),
-                  onPressed: _nextPage,
-                ),
-              ),
-            ],
-          ),
-        ],
+      padding: const EdgeInsets.symmetric(
+          horizontal: 16.0), // Add horizontal padding
+      child: SizedBox(
+        height: 150, // Adjust height to align with arrow buttons
+        child: PageView.builder(
+          controller: _pageController,
+          itemCount: widget.modules.length,
+          itemBuilder: (context, index) {
+            return ModuleTile(
+              moduleTitle: widget.modules[index],
+              onNext: _nextPage,
+              onPrevious: _previousPage,
+            );
+          },
+        ),
       ),
     );
   }
@@ -727,7 +696,7 @@ class ModuleTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20.0), // Adjust vertical padding
+      padding: const EdgeInsets.symmetric(horizontal: 50.0, vertical: 140.0),
       child: Container(
         width: 100,
         height: 100,
@@ -742,19 +711,52 @@ class ModuleTile extends StatelessWidget {
             ),
           ],
         ),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0), // Consistent padding with semester tile
-            child: Text(
-              moduleTitle,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16.0,
-                fontWeight: FontWeight.bold, // Use bold for emphasis
+        child: Stack(
+          alignment: Alignment.center, // Align content to the center
+          children: [
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(
+                    8.0), // Consistent padding with semester tile
+                child: Text(
+                  moduleTitle,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold, // Use bold for emphasis
+                  ),
+                ),
               ),
             ),
-          ),
+            // Left Arrow Button
+            Positioned(
+              left: 8.0,
+              child: ClipOval(
+                child: Material(
+                  color: Colors.transparent,
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                    onPressed: onPrevious,
+                  ),
+                ),
+              ),
+            ),
+            // Right Arrow Button
+            Positioned(
+              right: 8.0,
+              child: ClipOval(
+                child: Material(
+                  color: Colors.transparent,
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_forward_ios,
+                        color: Colors.white),
+                    onPressed: onNext,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -861,7 +863,6 @@ class CourseDetails extends StatelessWidget {
             child: Icon(Icons.school, size: 30, color: Colors.green),
           ),
           const SizedBox(width: 8.0), // Adjusted spacing
-
           // University name with responsive font size
           Text(
             'Pamantasan ng Lungsod ng San Pablo',
