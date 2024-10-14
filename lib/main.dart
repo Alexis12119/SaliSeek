@@ -518,14 +518,14 @@ class CourseDetails extends StatelessWidget {
                 style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
               ),
             ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: 5, // Example number of modules
-                itemBuilder: (context, index) {
-                  return ModuleTile(moduleTitle: 'Module ${index + 1}');
-                },
-              ),
-            ),
+Expanded(
+  child: ListView.builder(
+    itemCount: 5, // Example number of modules
+    itemBuilder: (context, index) {
+      return ModuleTile(moduleTitle: 'Module ${index + 1}'); 
+    },
+  ),
+),
           ],
         ),
       ),
@@ -659,17 +659,43 @@ class CourseTile extends StatelessWidget {
   }
 }
 
-class ModuleTileSection extends StatefulWidget {
+class ModuleTile extends StatelessWidget {
+  final String moduleTitle;
+
+  const ModuleTile({super.key, required this.moduleTitle});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0), // Add padding to maintain consistency
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF266A2D), // Same background color as semester and course tiles
+          borderRadius: BorderRadius.circular(8.0), // Rounded corners
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0), // Consistent padding with semester tile
+            child: Text(
+              moduleTitle,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16.0, // Adjust the font size as needed
+                fontWeight: FontWeight.bold, // Use bold for emphasis
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ModuleTileSection extends StatelessWidget {
   final List<String> modules;
 
   const ModuleTileSection({super.key, required this.modules});
-
-  @override
-  ModuleTileSectionState createState() => ModuleTileSectionState();
-}
-
-class ModuleTileSectionState extends State<ModuleTileSection> {
-  final ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -687,89 +713,16 @@ class ModuleTileSectionState extends State<ModuleTileSection> {
           ),
         ),
         SizedBox(
-          height: 80,
-          child: Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back_ios, size: 20),
-                onPressed: () {
-                  _scrollController.animateTo(
-                    _scrollController.offset - 100,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.ease,
-                  );
-                },
-              ),
-              Expanded(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  scrollDirection: Axis.horizontal,
-                  itemCount: widget.modules.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0), // Increased padding between tiles
-                      child: ModuleTile(moduleTitle: widget.modules[index]),
-                    );
-                  },
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.arrow_forward_ios, size: 20),
-                onPressed: () {
-                  _scrollController.animateTo(
-                    _scrollController.offset + 100,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.ease,
-                  );
-                },
-              ),
-            ],
+          height: 150, // Adjust height based on your layout
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: modules.length,
+            itemBuilder: (context, index) {
+              return ModuleTile(moduleTitle: modules[index]);
+            },
           ),
         ),
       ],
-    );
-  }
-}
-
-class ModuleTile extends StatelessWidget {
-  final String moduleTitle;
-
-  const ModuleTile({super.key, required this.moduleTitle});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0), // Adjusted horizontal padding
-      child: Container(
-        width: 150, // Adjust width to match the semester tile
-        height: 100, // Set a fixed height for consistency
-        decoration: BoxDecoration(
-          color: const Color(0xFF266A2D),
-          borderRadius: BorderRadius.circular(8.0),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black26,
-              offset: Offset(0, 2),
-              blurRadius: 6.0,
-              spreadRadius: 1.0,
-            ),
-          ],
-        ),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(12.0), // Consistent padding with semester tile
-            child: Text(
-              moduleTitle,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16.0, // Slightly larger font size
-                fontWeight: FontWeight.w500, // Slightly bolder font for emphasis
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
