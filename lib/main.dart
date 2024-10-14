@@ -231,12 +231,35 @@ class StudentDashboardState extends State<StudentDashboard> {
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
             onPressed: () {
-              // Implement logout functionality here
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const LoginPage(),
-                ),
+              // Show confirmation dialog before logging out
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Confirm Logout'),
+                    content: const Text('Are you sure you want to log out?'),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text('No'),
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close the dialog
+                        },
+                      ),
+                      TextButton(
+                        child: const Text('Yes'),
+                        onPressed: () {
+                          // Implement logout functionality here
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LoginPage(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                },
               );
             },
           ),
@@ -612,7 +635,8 @@ class ModuleTileSectionState extends State<ModuleTileSection> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0), // Add horizontal padding
+      padding: const EdgeInsets.symmetric(
+          horizontal: 16.0), // Add horizontal padding
       child: SizedBox(
         height: 150, // Adjust height to align with arrow buttons
         child: PageView.builder(
@@ -666,7 +690,8 @@ class ModuleTile extends StatelessWidget {
           children: [
             Center(
               child: Padding(
-                padding: const EdgeInsets.all(8.0), // Consistent padding with semester tile
+                padding: const EdgeInsets.all(
+                    8.0), // Consistent padding with semester tile
                 child: Text(
                   moduleTitle,
                   textAlign: TextAlign.center,
@@ -698,7 +723,8 @@ class ModuleTile extends StatelessWidget {
                 child: Material(
                   color: Colors.transparent,
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+                    icon: const Icon(Icons.arrow_forward_ios,
+                        color: Colors.white),
                     onPressed: onNext,
                   ),
                 ),
@@ -719,7 +745,8 @@ class CourseDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Example list of modules
-    final List<String> modules = List.generate(10, (index) => 'Module ${index + 1}');
+    final List<String> modules =
+        List.generate(10, (index) => 'Module ${index + 1}');
 
     return Scaffold(
       body: SafeArea(
@@ -747,7 +774,8 @@ class CourseDetails extends StatelessWidget {
                 CircleAvatar(
                   radius: 20,
                   backgroundColor: Colors.grey[300],
-                  child: const Icon(Icons.person, size: 20, color: Colors.white),
+                  child:
+                      const Icon(Icons.person, size: 20, color: Colors.white),
                 ),
                 const SizedBox(width: 8.0),
                 const Text(
@@ -759,7 +787,8 @@ class CourseDetails extends StatelessWidget {
 
             // Learning materials title
             const Padding(
-              padding: EdgeInsets.only(top: 16.0, bottom: 8.0), // Adjusted padding
+              padding:
+                  EdgeInsets.only(top: 16.0, bottom: 8.0), // Adjusted padding
               child: Text(
                 'Learning Materials:',
                 style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
