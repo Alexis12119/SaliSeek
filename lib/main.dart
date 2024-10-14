@@ -97,22 +97,35 @@ class _LoginPageState extends State<LoginPage> {
 
   // Header with logo and university name
   Widget buildHeader() {
+    // Get the screen width
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    // Set font size and padding based on the screen width
+    double fontSize =
+        screenWidth < 600 ? 16.0 : 18.0; // Smaller font for narrow screens
+    double padding =
+        screenWidth < 600 ? 12.0 : 16.0; // Smaller padding for narrow screens
+    double avatarSize = screenWidth < 600
+        ? 25.0
+        : 30.0; // Adjust avatar size for narrow screens
+    double spacing =
+        screenWidth < 600 ? 12.0 : 16.0; // Adjust spacing for narrow screens
+
     return Container(
       color: const Color(0xFF266A2D),
-      padding: const EdgeInsets.all(16.0),
-      child: const Row(
+      padding: EdgeInsets.all(padding),
+      child: Row(
         children: [
           CircleAvatar(
-            radius: 30, // Adjust size for logo
+            radius: avatarSize, // Responsive size for logo
             backgroundColor: Colors.white,
-            child: Icon(Icons.school,
-                size: 30, color: Colors.green), // Placeholder for the logo
+            child: const Icon(Icons.school, size: 30, color: Colors.green),
           ),
-          SizedBox(width: 16.0),
+          SizedBox(width: spacing), // Responsive spacing
           Text(
             'Pamantasan ng Lungsod ng San Pablo',
             style: TextStyle(
-              fontSize: 18.0,
+              fontSize: fontSize,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
@@ -203,25 +216,38 @@ class StudentDashboardState extends State<StudentDashboard> {
 
   // Header with logo and university name
   Widget buildHeader() {
+    // Get the screen width
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    // Set font size, padding, avatar size, and spacing based on the screen width
+    double fontSize =
+        screenWidth < 600 ? 16.0 : 18.0; // Smaller font for narrow screens
+    double padding =
+        screenWidth < 600 ? 12.0 : 16.0; // Smaller padding for narrow screens
+    double avatarSize = screenWidth < 600
+        ? 25.0
+        : 30.0; // Adjust avatar size for narrow screens
+    double spacing =
+        screenWidth < 600 ? 12.0 : 16.0; // Adjust spacing for narrow screens
+
     return Container(
       color: const Color(0xFF266A2D),
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(padding),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Row(
+          Row(
             children: [
               CircleAvatar(
-                radius: 30, // Adjust size for logo
+                radius: avatarSize, // Responsive size for logo
                 backgroundColor: Colors.white,
-                child: Icon(Icons.school,
-                    size: 30, color: Colors.green), // Placeholder for the logo
+                child: const Icon(Icons.school, size: 30, color: Colors.green),
               ),
-              SizedBox(width: 16.0),
+              SizedBox(width: spacing), // Responsive spacing
               Text(
                 'Pamantasan ng Lungsod ng San Pablo',
                 style: TextStyle(
-                  fontSize: 18.0,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
@@ -599,7 +625,7 @@ class ModuleTileSectionState extends State<ModuleTileSection> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: _currentPage);
+    _pageController = PageController(viewportFraction: 0.3); // Adjust the viewport fraction for three tiles
   }
 
   @override
@@ -609,7 +635,7 @@ class ModuleTileSectionState extends State<ModuleTileSection> {
   }
 
   void _nextPage() {
-    if (_currentPage < widget.modules.length - 1) {
+    if (_currentPage < (widget.modules.length / 3).ceil() - 1) {
       _currentPage++;
       _pageController.animateToPage(
         _currentPage,
@@ -635,21 +661,52 @@ class ModuleTileSectionState extends State<ModuleTileSection> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-          horizontal: 16.0), // Add horizontal padding
-      child: SizedBox(
-        height: 150, // Adjust height to align with arrow buttons
-        child: PageView.builder(
-          controller: _pageController,
-          itemCount: widget.modules.length,
-          itemBuilder: (context, index) {
-            return ModuleTile(
-              moduleTitle: widget.modules[index],
-              onNext: _nextPage,
-              onPrevious: _previousPage,
-            );
-          },
-        ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 150, // Adjust height to align with arrow buttons
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: (widget.modules.length / 3).ceil(), // Number of pages based on the number of tiles
+              itemBuilder: (context, index) {
+                // Create a row of three tiles for each page
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: List.generate(3, (tileIndex) {
+                    final moduleIndex = index * 3 + tileIndex; // Calculate the module index
+                    if (moduleIndex < widget.modules.length) {
+                      return ModuleTile(
+                        moduleTitle: widget.modules[moduleIndex],
+                        onNext: _nextPage,
+                        onPrevious: _previousPage,
+                      );
+                    }
+                    return const SizedBox.shrink(); // Return an empty widget if there are no more modules
+                  }),
+                );
+              },
+            ),
+          ),
+          // Navigation Arrows
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+                  onPressed: _previousPage,
+                ),
+              ),
+              Expanded(
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_forward_ios, color: Colors.black),
+                  onPressed: _nextPage,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -670,10 +727,10 @@ class ModuleTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(76.0), // Maintain consistent padding
+      padding: const EdgeInsets.symmetric(vertical: 20.0), // Adjust vertical padding
       child: Container(
-        width: 100, // Set a fixed width for the cube effect
-        height: 100, // Set a fixed height for the cube effect
+        width: 100,
+        height: 100,
         decoration: BoxDecoration(
           color: const Color(0xFF266A2D), // Background color
           borderRadius: BorderRadius.circular(12.0), // Slightly rounded corners
@@ -685,52 +742,19 @@ class ModuleTile extends StatelessWidget {
             ),
           ],
         ),
-        child: Stack(
-          alignment: Alignment.center, // Align content to the center
-          children: [
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(
-                    8.0), // Consistent padding with semester tile
-                child: Text(
-                  moduleTitle,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold, // Use bold for emphasis
-                  ),
-                ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0), // Consistent padding with semester tile
+            child: Text(
+              moduleTitle,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold, // Use bold for emphasis
               ),
             ),
-            // Left Arrow Button
-            Positioned(
-              left: 8.0,
-              child: ClipOval(
-                child: Material(
-                  color: Colors.transparent,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                    onPressed: onPrevious,
-                  ),
-                ),
-              ),
-            ),
-            // Right Arrow Button
-            Positioned(
-              right: 8.0,
-              child: ClipOval(
-                child: Material(
-                  color: Colors.transparent,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_forward_ios,
-                        color: Colors.white),
-                    onPressed: onNext,
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -807,9 +831,18 @@ class CourseDetails extends StatelessWidget {
 
   // Reuse the header from the main window
   Widget buildHeader(BuildContext context) {
+    // Get the screen width
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    // Set font size and padding based on the screen width
+    double fontSize =
+        screenWidth < 600 ? 16.0 : 18.0; // Smaller font for narrow screens
+    double padding =
+        screenWidth < 600 ? 12.0 : 16.0; // Smaller padding for narrow screens
+
     return Container(
       color: const Color(0xFF266A2D),
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(padding),
       child: Row(
         children: [
           // Back button
@@ -819,7 +852,7 @@ class CourseDetails extends StatelessWidget {
               Navigator.pop(context); // Go back to the previous screen
             },
           ),
-          const SizedBox(width: 16.0),
+          const SizedBox(width: 8.0), // Adjusted spacing
 
           // Logo and university name
           const CircleAvatar(
@@ -827,11 +860,13 @@ class CourseDetails extends StatelessWidget {
             backgroundColor: Colors.white,
             child: Icon(Icons.school, size: 30, color: Colors.green),
           ),
-          const SizedBox(width: 16.0),
-          const Text(
+          const SizedBox(width: 8.0), // Adjusted spacing
+
+          // University name with responsive font size
+          Text(
             'Pamantasan ng Lungsod ng San Pablo',
             style: TextStyle(
-              fontSize: 18.0,
+              fontSize: fontSize,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
