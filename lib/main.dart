@@ -246,11 +246,11 @@ class StudentDashboardState extends State<StudentDashboard> {
         screenWidth < 600 ? 14.0 : 18.0; // Smaller font for narrow screens
     double padding =
         screenWidth < 600 ? 12.0 : 16.0; // Smaller padding for narrow screens
-    double avatarSize = screenWidth < 600
-        ? 25.0
-        : 30.0; // Adjust avatar size for narrow screens
     double spacing =
         screenWidth < 600 ? 12.0 : 16.0; // Adjust spacing for narrow screens
+    double logoIconSize = screenWidth < 600
+        ? 20.0
+        : 30.0; // Adjust the size of the logo icon inside the CircleAvatar
 
     return Container(
       color: const Color(0xFF266A2D),
@@ -261,7 +261,7 @@ class StudentDashboardState extends State<StudentDashboard> {
           Row(
             children: [
               CircleAvatar(
-                radius: avatarSize, // Responsive size for logo
+                radius: logoIconSize, // Responsive size for logo
                 backgroundColor: Colors.white,
                 child: const Icon(Icons.school, size: 30, color: Colors.green),
               ),
@@ -486,7 +486,7 @@ class ViewGradeDetails extends StatelessWidget {
             // List of course tiles with course name and grades
             Expanded(
               child: ListView.builder(
-                itemCount: 5, // Display 5 tiles
+                itemCount: 10, // Display 10 tiles
                 itemBuilder: (context, index) {
                   return const CourseTile(
                     courseCode: 'IT 101',
@@ -513,14 +513,10 @@ class ViewGradeDetails extends StatelessWidget {
         screenWidth < 600 ? 14.0 : 18.0; // Smaller font for narrow screens
     double padding =
         screenWidth < 600 ? 12.0 : 16.0; // Adjust padding for narrow screens
-    double avatarSize = screenWidth < 600
-        ? 25.0
-        : 30.0; // Adjust avatar size for narrow screens
-    double iconSize = screenWidth < 600 ? 15.0 : 24.0; // Adjust icon size
+       double iconSize = screenWidth < 600 ? 15.0 : 20.0; // Adjust icon size
     double logoIconSize = screenWidth < 600
         ? 20.0
         : 30.0; // Adjust the size of the logo icon inside the CircleAvatar
-
     return Container(
       color: const Color(0xFF266A2D),
       padding: EdgeInsets.all(padding), // Responsive padding
@@ -535,11 +531,11 @@ class ViewGradeDetails extends StatelessWidget {
             },
           ),
           SizedBox(
-              width: screenWidth < 600 ? 12.0 : 16.0), // Responsive spacing
+              width: screenWidth < 600 ? 2.0 : 6.0), // Responsive spacing
 
           // Logo
           CircleAvatar(
-            radius: avatarSize, // Responsive avatar size
+            radius: logoIconSize, // Responsive avatar size
             backgroundColor: Colors.white,
             child: Icon(Icons.school,
                 size: logoIconSize,
@@ -784,8 +780,8 @@ class CourseDetails extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width;
     double fontSize = screenWidth < 600 ? 14.0 : 18.0;
     double padding = screenWidth < 600 ? 12.0 : 16.0;
-    double iconSize = screenWidth < 600 ? 20.0 : 24.0;
-    double iconPadding = screenWidth < 600 ? 4.0 : 8.0;
+    double iconSize = screenWidth < 600 ? 15.0 : 20.0;
+    double iconPadding = screenWidth < 600 ? 0.0 : 8.0;
     double logoSize = screenWidth < 600 ? 20.0 : 30.0;
     double logoIconSize = screenWidth < 600 ? 20.0 : 30.0;
 
@@ -804,13 +800,15 @@ class CourseDetails extends StatelessWidget {
               },
             ),
           ),
-          const SizedBox(width: 8.0),
+          SizedBox(
+              width: screenWidth < 600 ? 2.0 : 6.0), // Responsive spacing
           CircleAvatar(
             radius: logoSize,
             backgroundColor: Colors.white,
             child: Icon(Icons.school, size: logoIconSize, color: Colors.green),
           ),
-          const SizedBox(width: 8.0),
+          const SizedBox(
+              width: 8.0), // Responsive spacing
           Expanded(
             child: Text(
               'Pamantasan ng Lungsod ng San Pablo',
