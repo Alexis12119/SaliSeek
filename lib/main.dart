@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 void main() {
@@ -106,7 +105,8 @@ class _LoginPageState extends State<LoginPage> {
           CircleAvatar(
             radius: 30, // Adjust size for logo
             backgroundColor: Colors.white,
-            child: Icon(Icons.school, size: 30, color: Colors.green), // Placeholder for the logo
+            child: Icon(Icons.school,
+                size: 30, color: Colors.green), // Placeholder for the logo
           ),
           SizedBox(width: 16.0),
           Text(
@@ -214,7 +214,8 @@ class StudentDashboardState extends State<StudentDashboard> {
               CircleAvatar(
                 radius: 30, // Adjust size for logo
                 backgroundColor: Colors.white,
-                child: Icon(Icons.school, size: 30, color: Colors.green), // Placeholder for the logo
+                child: Icon(Icons.school,
+                    size: 30, color: Colors.green), // Placeholder for the logo
               ),
               SizedBox(width: 16.0),
               Text(
@@ -324,7 +325,9 @@ class StudentDashboardState extends State<StudentDashboard> {
                   itemCount: items.length,
                   itemBuilder: (context, index) {
                     return GestureDetector(
-                      onTap: onTilePressed != null ? () => onTilePressed(items[index]) : null,
+                      onTap: onTilePressed != null
+                          ? () => onTilePressed(items[index])
+                          : null,
                       child: SemesterTile(items[index]),
                     );
                   },
@@ -500,7 +503,8 @@ class CourseDetails extends StatelessWidget {
                 CircleAvatar(
                   radius: 20,
                   backgroundColor: Colors.grey[300],
-                  child: const Icon(Icons.person, size: 20, color: Colors.white),
+                  child:
+                      const Icon(Icons.person, size: 20, color: Colors.white),
                 ),
                 const SizedBox(width: 8.0),
                 const Text(
@@ -518,14 +522,14 @@ class CourseDetails extends StatelessWidget {
                 style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
               ),
             ),
-Expanded(
-  child: ListView.builder(
-    itemCount: 5, // Example number of modules
-    itemBuilder: (context, index) {
-      return ModuleTile(moduleTitle: 'Module ${index + 1}'); 
-    },
-  ),
-),
+            Expanded(
+              child: ListView.builder(
+                itemCount: 5, // Example number of modules
+                itemBuilder: (context, index) {
+                  return ModuleTile(moduleTitle: 'Module ${index + 1}');
+                },
+              ),
+            ),
           ],
         ),
       ),
@@ -569,7 +573,6 @@ Expanded(
   }
 }
 
-
 // Course tile widget in square format
 class CourseTile extends StatelessWidget {
   final String courseCode;
@@ -577,7 +580,8 @@ class CourseTile extends StatelessWidget {
   final String midtermGrade;
   final String finalGrade;
 
-  const CourseTile({super.key, 
+  const CourseTile({
+    super.key,
     required this.courseCode,
     required this.courseName,
     required this.midtermGrade,
@@ -626,7 +630,8 @@ class CourseTile extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(width: 24.0), // Spacing between Midterm and Finals
+                      const SizedBox(
+                          width: 24.0), // Spacing between Midterm and Finals
                       Text(
                         finalGrade,
                         style: const TextStyle(
@@ -670,12 +675,14 @@ class ModuleTile extends StatelessWidget {
       padding: const EdgeInsets.all(8.0), // Add padding to maintain consistency
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF266A2D), // Same background color as semester and course tiles
+          color: const Color(
+              0xFF266A2D), // Same background color as semester and course tiles
           borderRadius: BorderRadius.circular(8.0), // Rounded corners
         ),
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(16.0), // Consistent padding with semester tile
+            padding: const EdgeInsets.all(
+                16.0), // Consistent padding with semester tile
             child: Text(
               moduleTitle,
               textAlign: TextAlign.center,
