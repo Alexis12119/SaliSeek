@@ -891,13 +891,18 @@ class CourseDetails extends StatelessWidget {
             child: Icon(Icons.school, size: 30, color: Colors.green),
           ),
           const SizedBox(width: 8.0), // Adjusted spacing
-          // University name with responsive font size
-          Text(
-            'Pamantasan ng Lungsod ng San Pablo',
-            style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+
+          // University name with ellipsis when text overflows
+          Expanded(
+            child: Text(
+              'Pamantasan ng Lungsod ng San Pablo',
+              style: TextStyle(
+                fontSize: fontSize,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+              overflow:
+                  TextOverflow.ellipsis, // Add ellipsis when text overflows
             ),
           ),
         ],
