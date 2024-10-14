@@ -469,110 +469,6 @@ class ViewGradeDetails extends StatelessWidget {
   }
 }
 
-// CourseDetails Page with course name and learning materials
-class CourseDetails extends StatelessWidget {
-  final String title;
-
-  const CourseDetails({super.key, required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Retain the header
-            buildHeader(context),
-
-            // Course Name
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 24.0, // Larger font size
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-
-            // Instructor's name and profile logo
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Colors.grey[300],
-                  child:
-                      const Icon(Icons.person, size: 20, color: Colors.white),
-                ),
-                const SizedBox(width: 8.0),
-                const Text(
-                  'Instructor: John Doe',
-                  style: TextStyle(fontSize: 18.0),
-                ),
-              ],
-            ),
-
-            // Learning materials (modules)
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                'Learning Materials:',
-                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-              ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: 5, // Example number of modules
-                itemBuilder: (context, index) {
-                  return ModuleTile(moduleTitle: 'Module ${index + 1}');
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Reuse the header from the main window
-  Widget buildHeader(BuildContext context) {
-    return Container(
-      color: const Color(0xFF266A2D),
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        children: [
-          // Back button
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-            onPressed: () {
-              Navigator.pop(context); // Go back to the previous screen
-            },
-          ),
-          const SizedBox(width: 16.0),
-
-          // Logo and university name
-          const CircleAvatar(
-            radius: 30,
-            backgroundColor: Colors.white,
-            child: Icon(Icons.school, size: 30, color: Colors.green),
-          ),
-          const SizedBox(width: 16.0),
-          const Text(
-            'Pamantasan ng Lungsod ng San Pablo',
-            style: TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 // Course tile widget in square format
 class CourseTile extends StatelessWidget {
   final String courseCode;
@@ -664,72 +560,255 @@ class CourseTile extends StatelessWidget {
   }
 }
 
-class ModuleTile extends StatelessWidget {
-  final String moduleTitle;
+class ModuleTileSection extends StatefulWidget {
+  final List<String> modules;
 
-  const ModuleTile({super.key, required this.moduleTitle});
+  const ModuleTileSection({super.key, required this.modules});
+
+  @override
+  ModuleTileSectionState createState() => ModuleTileSectionState();
+}
+
+class ModuleTileSectionState extends State<ModuleTileSection> {
+  late PageController _pageController;
+  int _currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _currentPage);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose(); // Dispose the controller when no longer needed
+    super.dispose();
+  }
+
+  void _nextPage() {
+    if (_currentPage < widget.modules.length - 1) {
+      _currentPage++;
+      _pageController.animateToPage(
+        _currentPage,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+      setState(() {}); // Update state to reflect current page
+    }
+  }
+
+  void _previousPage() {
+    if (_currentPage > 0) {
+      _currentPage--;
+      _pageController.animateToPage(
+        _currentPage,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+      setState(() {}); // Update state to reflect current page
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0), // Add padding to maintain consistency
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(
-              0xFF266A2D), // Same background color as semester and course tiles
-          borderRadius: BorderRadius.circular(8.0), // Rounded corners
-        ),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(
-                16.0), // Consistent padding with semester tile
-            child: Text(
-              moduleTitle,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16.0, // Adjust the font size as needed
-                fontWeight: FontWeight.bold, // Use bold for emphasis
-              ),
-            ),
-          ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0), // Add horizontal padding
+      child: SizedBox(
+        height: 150, // Adjust height to align with arrow buttons
+        child: PageView.builder(
+          controller: _pageController,
+          itemCount: widget.modules.length,
+          itemBuilder: (context, index) {
+            return ModuleTile(
+              moduleTitle: widget.modules[index],
+              onNext: _nextPage,
+              onPrevious: _previousPage,
+            );
+          },
         ),
       ),
     );
   }
 }
 
-class ModuleTileSection extends StatelessWidget {
-  final List<String> modules;
+class ModuleTile extends StatelessWidget {
+  final String moduleTitle;
+  final VoidCallback onNext;
+  final VoidCallback onPrevious;
 
-  const ModuleTileSection({super.key, required this.modules});
+  const ModuleTile({
+    super.key,
+    required this.moduleTitle,
+    required this.onNext,
+    required this.onPrevious,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 16.0, top: 16.0, bottom: 8.0),
-          child: Text(
-            'Modules:',
+    return Padding(
+      padding: const EdgeInsets.all(76.0), // Maintain consistent padding
+      child: Container(
+        width: 100, // Set a fixed width for the cube effect
+        height: 100, // Set a fixed height for the cube effect
+        decoration: BoxDecoration(
+          color: const Color(0xFF266A2D), // Background color
+          borderRadius: BorderRadius.circular(12.0), // Slightly rounded corners
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              offset: Offset(2, 2),
+              blurRadius: 6.0,
+            ),
+          ],
+        ),
+        child: Stack(
+          alignment: Alignment.center, // Align content to the center
+          children: [
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0), // Consistent padding with semester tile
+                child: Text(
+                  moduleTitle,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold, // Use bold for emphasis
+                  ),
+                ),
+              ),
+            ),
+            // Left Arrow Button
+            Positioned(
+              left: 8.0,
+              child: ClipOval(
+                child: Material(
+                  color: Colors.transparent,
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                    onPressed: onPrevious,
+                  ),
+                ),
+              ),
+            ),
+            // Right Arrow Button
+            Positioned(
+              right: 8.0,
+              child: ClipOval(
+                child: Material(
+                  color: Colors.transparent,
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+                    onPressed: onNext,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class CourseDetails extends StatelessWidget {
+  final String title;
+
+  const CourseDetails({super.key, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    // Example list of modules
+    final List<String> modules = List.generate(10, (index) => 'Module ${index + 1}');
+
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Retain the header
+            buildHeader(context),
+
+            // Course Name
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 24.0, // Larger font size
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+
+            // Instructor's name and profile logo
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: Colors.grey[300],
+                  child: const Icon(Icons.person, size: 20, color: Colors.white),
+                ),
+                const SizedBox(width: 8.0),
+                const Text(
+                  'Instructor: John Doe',
+                  style: TextStyle(fontSize: 18.0),
+                ),
+              ],
+            ),
+
+            // Learning materials title
+            const Padding(
+              padding: EdgeInsets.only(top: 16.0, bottom: 8.0), // Adjusted padding
+              child: Text(
+                'Learning Materials:',
+                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+              ),
+            ),
+
+            // Learning materials (modules)
+            Expanded(
+              child: ModuleTileSection(modules: modules),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Reuse the header from the main window
+  Widget buildHeader(BuildContext context) {
+    return Container(
+      color: const Color(0xFF266A2D),
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        children: [
+          // Back button
+          IconButton(
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+            onPressed: () {
+              Navigator.pop(context); // Go back to the previous screen
+            },
+          ),
+          const SizedBox(width: 16.0),
+
+          // Logo and university name
+          const CircleAvatar(
+            radius: 30,
+            backgroundColor: Colors.white,
+            child: Icon(Icons.school, size: 30, color: Colors.green),
+          ),
+          const SizedBox(width: 16.0),
+          const Text(
+            'Pamantasan ng Lungsod ng San Pablo',
             style: TextStyle(
               fontSize: 18.0,
               fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ),
-        ),
-        SizedBox(
-          height: 150, // Adjust height based on your layout
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: modules.length,
-            itemBuilder: (context, index) {
-              return ModuleTile(moduleTitle: modules[index]);
-            },
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
