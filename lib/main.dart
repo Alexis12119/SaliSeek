@@ -112,13 +112,13 @@ class _LoginPageState extends State<LoginPage> {
         screenWidth < 600 ? 12.0 : 16.0; // Adjust spacing for narrow screens
 
     return Container(
-      color: const Color(0xFF266A2D),
+      color: const Color(0xFF2C9B44),
       padding: EdgeInsets.all(padding),
       child: Row(
         children: [
           CircleAvatar(
             radius: avatarSize, // Responsive size for logo
-            backgroundColor: Colors.white,
+            backgroundColor: const Color(0xFFF2F8FC),
             child: const Icon(Icons.school, size: 30, color: Colors.green),
           ),
           SizedBox(width: spacing), // Responsive spacing
@@ -130,7 +130,7 @@ class _LoginPageState extends State<LoginPage> {
               style: TextStyle(
                 fontSize: fontSize,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: const Color(0xFFF2F8FC),
               ),
               maxLines: 1, // Restrict to one line
               overflow: TextOverflow.ellipsis, // Add ellipsis if text overflows
@@ -253,7 +253,7 @@ class StudentDashboardState extends State<StudentDashboard> {
         : 30.0; // Adjust the size of the logo icon inside the CircleAvatar
 
     return Container(
-      color: const Color(0xFF266A2D),
+      color: const Color(0xFF2C9B44),
       padding: EdgeInsets.all(padding),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -262,7 +262,7 @@ class StudentDashboardState extends State<StudentDashboard> {
             children: [
               CircleAvatar(
                 radius: logoIconSize, // Responsive size for logo
-                backgroundColor: Colors.white,
+                backgroundColor: const Color(0xFFF2F8FC),
                 child: const Icon(Icons.school, size: 30, color: Colors.green),
               ),
               SizedBox(width: spacing), // Responsive spacing
@@ -271,13 +271,13 @@ class StudentDashboardState extends State<StudentDashboard> {
                 style: TextStyle(
                   fontSize: fontSize,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: const Color(0xFFF2F8FC),
                 ),
               ),
             ],
           ),
           IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
+            icon: const Icon(Icons.logout, color: Color(0xFFF2F8FC)),
             onPressed: () {
               // Show confirmation dialog before logging out
               showDialog(
@@ -319,7 +319,7 @@ class StudentDashboardState extends State<StudentDashboard> {
   // Profile section
   Widget buildProfileSection() {
     return Container(
-      color: Colors.white,
+      color: const Color(0xFFF2F8FC),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -435,7 +435,7 @@ class SemesterTile extends StatelessWidget {
       child: Container(
         width: 150,
         decoration: BoxDecoration(
-          color: const Color(0xFF266A2D),
+          color: const Color(0xFF2C9B44),
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: Center(
@@ -445,7 +445,7 @@ class SemesterTile extends StatelessWidget {
               title,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Colors.white,
+                color: Color(0xFFF2F8FC),
                 fontSize: 16.0,
               ),
             ),
@@ -513,33 +513,33 @@ class ViewGradeDetails extends StatelessWidget {
         screenWidth < 600 ? 14.0 : 18.0; // Smaller font for narrow screens
     double padding =
         screenWidth < 600 ? 12.0 : 16.0; // Adjust padding for narrow screens
-       double iconSize = screenWidth < 600 ? 15.0 : 20.0; // Adjust icon size
+    double iconSize = screenWidth < 600 ? 15.0 : 20.0; // Adjust icon size
     double logoIconSize = screenWidth < 600
         ? 20.0
         : 30.0; // Adjust the size of the logo icon inside the CircleAvatar
     return Container(
-      color: const Color(0xFF266A2D),
+      color: const Color(0xFF2C9B44),
       padding: EdgeInsets.all(padding), // Responsive padding
       child: Row(
         children: [
           // Back button
           IconButton(
             icon: Icon(Icons.arrow_back_ios,
-                color: Colors.white, size: iconSize), // Responsive icon size
+                color: const Color(0xFFF2F8FC),
+                size: iconSize), // Responsive icon size
             onPressed: () {
               Navigator.pop(context); // Go back to the previous screen
             },
           ),
-          SizedBox(
-              width: screenWidth < 600 ? 2.0 : 6.0), // Responsive spacing
+          SizedBox(width: screenWidth < 600 ? 2.0 : 6.0), // Responsive spacing
 
           // Logo
           CircleAvatar(
             radius: logoIconSize, // Responsive avatar size
-            backgroundColor: Colors.white,
+            backgroundColor: const Color(0xFFF2F8FC),
             child: Icon(Icons.school,
                 size: logoIconSize,
-                color: Colors.green), // Responsive icon size
+                color: const Color(0xFF2C9B44)), // Responsive icon size
           ),
           SizedBox(
               width: screenWidth < 600 ? 12.0 : 16.0), // Responsive spacing
@@ -551,7 +551,7 @@ class ViewGradeDetails extends StatelessWidget {
               style: TextStyle(
                 fontSize: fontSize, // Responsive font size
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: const Color(0xFFF2F8FC),
               ),
               overflow: TextOverflow.ellipsis, // Handles text overflow
             ),
@@ -653,7 +653,6 @@ class CourseTile extends StatelessWidget {
   }
 }
 
-
 class CourseDetails extends StatelessWidget {
   final String title;
 
@@ -664,6 +663,15 @@ class CourseDetails extends StatelessWidget {
     final List<String> modules =
         List.generate(10, (index) => 'Module ${index + 1}');
 
+    final List<Map<String, String>> tasksAndActivities = List.generate(
+      10,
+      (index) => {
+        'name': 'Task ${index + 1}',
+        'description': 'Description of Task ${index + 1}',
+        'dueDate': 'Oct. 20'
+      },
+    );
+
     Widget buildSectionWithArrows({
       required ScrollController scrollController,
       required List<String> items,
@@ -673,7 +681,7 @@ class CourseDetails extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            height: 150,
+            height: 100,
             child: Row(
               children: [
                 IconButton(
@@ -718,6 +726,117 @@ class CourseDetails extends StatelessWidget {
       );
     }
 
+    Widget buildTasksAndActivities() {
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Tasks and Activities:',
+              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16.0),
+            Expanded(
+              child: ListView.builder(
+                itemCount: tasksAndActivities.length,
+                itemBuilder: (context, index) {
+                  final task = tasksAndActivities[index];
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 16.0),
+                    padding: const EdgeInsets.all(12.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.2),
+                          spreadRadius: 1,
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor: Colors.grey[300],
+                              child:
+                                  const Icon(Icons.person, color: Colors.green),
+                            ),
+                            const SizedBox(width: 8.0),
+                            const Text(
+                              'Student Name',
+                              style: TextStyle(fontSize: 14.0),
+                            ),
+                            const Spacer(), // Added to push due date to the end
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  'Due (${task['dueDate']})',
+                                  style: const TextStyle(
+                                    fontSize: 12.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 8.0),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12.0),
+                        const SizedBox(height: 4.0),
+                        Row(children: [
+                          // Task Details
+                          Text(
+                            task['description']!,
+                            style: const TextStyle(fontSize: 14.0),
+                          ),
+                          const Spacer(),
+                          const SizedBox(height: 8.0),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Container(
+                                width: 20,
+                                height: 20,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[300],
+                                  borderRadius: BorderRadius.circular(4.0),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ]),
+                        const SizedBox(height: 16.0),
+                        // See Details at bottom right
+                        const Align(
+                          alignment: Alignment.bottomRight,
+                          child: Text(
+                            'See Details',
+                            style: TextStyle(
+                              fontSize: 14.0,
+                              color: Colors.black,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     final ScrollController moduleScrollController = ScrollController();
 
     return Scaffold(
@@ -725,7 +844,6 @@ class CourseDetails extends StatelessWidget {
         child: Column(
           children: [
             buildHeader(context),
-
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
@@ -736,7 +854,6 @@ class CourseDetails extends StatelessWidget {
                 ),
               ),
             ),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -753,11 +870,8 @@ class CourseDetails extends StatelessWidget {
                 ),
               ],
             ),
-
-            // Learning materials title
             const Padding(
-              padding: EdgeInsets.only(
-                  top: 16.0, bottom: 0.0), // Reduced bottom padding
+              padding: EdgeInsets.only(top: 16.0, bottom: 0.0),
               child: Text(
                 'Learning Materials:',
                 style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
@@ -768,14 +882,14 @@ class CourseDetails extends StatelessWidget {
               scrollController: moduleScrollController,
               items: modules,
               onTilePressed: (title) {},
-            )
+            ),
+            Expanded(child: buildTasksAndActivities()),
           ],
         ),
       ),
     );
   }
 
-  // Reuse the header from the main window
   Widget buildHeader(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double fontSize = screenWidth < 600 ? 14.0 : 18.0;
@@ -786,7 +900,7 @@ class CourseDetails extends StatelessWidget {
     double logoIconSize = screenWidth < 600 ? 20.0 : 30.0;
 
     return Container(
-      color: const Color(0xFF266A2D),
+      color: const Color(0xFF2C9B44),
       padding: EdgeInsets.all(padding),
       child: Row(
         children: [
@@ -794,28 +908,26 @@ class CourseDetails extends StatelessWidget {
             padding: EdgeInsets.all(iconPadding),
             child: IconButton(
               iconSize: iconSize,
-              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+              icon: const Icon(Icons.arrow_back_ios, color: Color(0xFFF2F8FC)),
               onPressed: () {
                 Navigator.pop(context);
               },
             ),
           ),
-          SizedBox(
-              width: screenWidth < 600 ? 2.0 : 6.0), // Responsive spacing
+          SizedBox(width: screenWidth < 600 ? 2.0 : 6.0),
           CircleAvatar(
             radius: logoSize,
-            backgroundColor: Colors.white,
+            backgroundColor: const Color(0xFFF2F8FC),
             child: Icon(Icons.school, size: logoIconSize, color: Colors.green),
           ),
-          const SizedBox(
-              width: 8.0), // Responsive spacing
+          const SizedBox(width: 8.0),
           Expanded(
             child: Text(
               'Pamantasan ng Lungsod ng San Pablo',
               style: TextStyle(
                 fontSize: fontSize,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: const Color(0xFFF2F8FC),
               ),
               overflow: TextOverflow.ellipsis,
             ),
