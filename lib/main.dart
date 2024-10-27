@@ -362,63 +362,65 @@ class StudentDashboardState extends State<StudentDashboard> {
     required List<String> items,
     required Function(String)? onTilePressed,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            title,
-            style: const TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        SizedBox(
-          height: 150,
-          child: Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back_ios),
-                onPressed: () {
-                  scrollController.animateTo(
-                    scrollController.offset - 150,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.ease,
-                  );
-                },
-              ),
-              Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  scrollDirection: Axis.horizontal,
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: onTilePressed != null
-                          ? () => onTilePressed(items[index])
-                          : null,
-                      child: SemesterTile(items[index]),
-                    );
-                  },
+    return Container(
+        color: const Color(0xFFF2F8FC),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.arrow_forward_ios),
-                onPressed: () {
-                  scrollController.animateTo(
-                    scrollController.offset + 150,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.ease,
-                  );
-                },
+            ),
+            SizedBox(
+              height: 150,
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios),
+                    onPressed: () {
+                      scrollController.animateTo(
+                        scrollController.offset - 150,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.ease,
+                      );
+                    },
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      controller: scrollController,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: items.length,
+                      itemBuilder: (context, index) {
+                        return GestureDetector(
+                          onTap: onTilePressed != null
+                              ? () => onTilePressed(items[index])
+                              : null,
+                          child: SemesterTile(items[index]),
+                        );
+                      },
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.arrow_forward_ios),
+                    onPressed: () {
+                      scrollController.animateTo(
+                        scrollController.offset + 150,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.ease,
+                      );
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-      ],
-    );
+            ),
+          ],
+        ));
   }
 }
 
@@ -466,38 +468,41 @@ class ViewGradeDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: [
-            // Retain the header
-            buildHeader(context),
+        child: Container(
+          color: const Color(0xFFF2F8FC), // Set the background color to white
+          child: Column(
+            children: [
+              // Retain the header
+              buildHeader(context),
 
-            // Title of the selected semester
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 24.0, // Larger font size
-                  fontWeight: FontWeight.bold,
+              // Title of the selected semester
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 24.0, // Larger font size
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
 
-            // List of course tiles with course name and grades
-            Expanded(
-              child: ListView.builder(
-                itemCount: 10, // Display 10 tiles
-                itemBuilder: (context, index) {
-                  return const CourseTile(
-                    courseCode: 'IT 101',
-                    courseName: 'Programming Fundamentals',
-                    midtermGrade: '1.00',
-                    finalGrade: '1.00',
-                  );
-                },
+              // List of course tiles with course name and grades
+              Expanded(
+                child: ListView.builder(
+                  itemCount: 10, // Display 10 tiles
+                  itemBuilder: (context, index) {
+                    return const CourseTile(
+                      courseCode: 'IT 101',
+                      courseName: 'Programming Fundamentals',
+                      midtermGrade: '1.00',
+                      finalGrade: '1.00',
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -727,119 +732,122 @@ class CourseDetails extends StatelessWidget {
     }
 
     Widget buildTasksAndActivities() {
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Tasks and Activities:',
-              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16.0),
-            Expanded(
-              child: ListView.builder(
-                itemCount: tasksAndActivities.length,
-                itemBuilder: (context, index) {
-                  final task = tasksAndActivities[index];
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 16.0),
-                    padding: const EdgeInsets.all(12.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.2),
-                          spreadRadius: 1,
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundColor: Colors.grey[300],
-                              child:
-                                  const Icon(Icons.person, color: Colors.green),
-                            ),
-                            const SizedBox(width: 8.0),
-                            const Text(
-                              'Student Name',
-                              style: TextStyle(fontSize: 14.0),
-                            ),
-                            const Spacer(), // Added to push due date to the end
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  'Due (${task['dueDate']})',
-                                  style: const TextStyle(
-                                    fontSize: 12.0,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 8.0),
-                              ],
+      return Container(
+          color: const Color(0xFFF2F8FC),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Tasks and Activities:',
+                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16.0),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: tasksAndActivities.length,
+                    itemBuilder: (context, index) {
+                      final task = tasksAndActivities[index];
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 16.0),
+                        padding: const EdgeInsets.all(12.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              spreadRadius: 1,
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12.0),
-                        const SizedBox(height: 4.0),
-                        Row(children: [
-                          // Task Details
-                          Text(
-                            task['description']!,
-                            style: const TextStyle(fontSize: 14.0),
-                          ),
-                          const Spacer(),
-                          const SizedBox(height: 8.0),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Container(
-                                width: 20,
-                                height: 20,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[300],
-                                  borderRadius: BorderRadius.circular(4.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 20,
+                                  backgroundColor: Colors.grey[300],
+                                  child: const Icon(Icons.person,
+                                      color: Colors.green),
+                                ),
+                                const SizedBox(width: 8.0),
+                                const Text(
+                                  'Student Name',
+                                  style: TextStyle(fontSize: 14.0),
+                                ),
+                                const Spacer(), // Added to push due date to the end
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      'Due (${task['dueDate']})',
+                                      style: const TextStyle(
+                                        fontSize: 12.0,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8.0),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12.0),
+                            const SizedBox(height: 4.0),
+                            Row(children: [
+                              // Task Details
+                              Text(
+                                task['description']!,
+                                style: const TextStyle(fontSize: 14.0),
+                              ),
+                              const Spacer(),
+                              const SizedBox(height: 8.0),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Container(
+                                    width: 20,
+                                    height: 20,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[300],
+                                      borderRadius: BorderRadius.circular(4.0),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ]),
+                            const SizedBox(height: 16.0),
+                            // See Details at bottom right
+                            const Align(
+                              alignment: Alignment.bottomRight,
+                              child: Text(
+                                'See Details',
+                                style: TextStyle(
+                                  fontSize: 14.0,
+                                  color: Colors.black,
+                                  decoration: TextDecoration.underline,
                                 ),
                               ),
-                            ],
-                          ),
-                        ]),
-                        const SizedBox(height: 16.0),
-                        // See Details at bottom right
-                        const Align(
-                          alignment: Alignment.bottomRight,
-                          child: Text(
-                            'See Details',
-                            style: TextStyle(
-                              fontSize: 14.0,
-                              color: Colors.black,
-                              decoration: TextDecoration.underline,
                             ),
-                          ),
+                          ],
                         ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      );
+          ));
     }
 
     final ScrollController moduleScrollController = ScrollController();
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF2F8FC), 
       body: SafeArea(
         child: Column(
           children: [
