@@ -321,36 +321,40 @@ class StudentDashboardState extends State<StudentDashboard> {
     return Container(
       color: const Color(0xFFF2F8FC),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          CircleAvatar(
-            radius: 40,
-            backgroundColor: Colors.grey[300],
-            child: const Icon(Icons.person, size: 50, color: Colors.green),
-          ),
-          const SizedBox(width: 16.0),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Name: Unknown',
-                style: TextStyle(
-                  fontSize: 18.0,
-                  color: Colors.black,
+      child: Center(
+        child: Row(
+          mainAxisAlignment:
+              MainAxisAlignment.center, // Center items within the Row
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            CircleAvatar(
+              radius: 40,
+              backgroundColor: Colors.grey[300],
+              child: const Icon(Icons.person, size: 50, color: Colors.green),
+            ),
+            const SizedBox(width: 16.0),
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Name: Unknown',
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    color: Colors.black,
+                  ),
                 ),
-              ),
-              SizedBox(height: 8.0),
-              Text(
-                'Student ID: 12-345',
-                style: TextStyle(
-                  fontSize: 16.0,
-                  color: Colors.black,
+                SizedBox(height: 8.0),
+                Text(
+                  'Student ID: 12-345',
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.black,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
