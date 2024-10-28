@@ -822,14 +822,24 @@ class CourseDetails extends StatelessWidget {
                             ]),
                             const SizedBox(height: 16.0),
                             // See Details at bottom right
-                            const Align(
+                            Align(
                               alignment: Alignment.bottomRight,
-                              child: Text(
-                                'See Details',
-                                style: TextStyle(
-                                  fontSize: 14.0,
-                                  color: Colors.black,
-                                  decoration: TextDecoration.underline,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const DetailsPage(),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  'See Details',
+                                  style: TextStyle(
+                                    fontSize: 14.0,
+                                    color: Colors.black,
+                                    decoration: TextDecoration.underline,
+                                  ),
                                 ),
                               ),
                             ),
@@ -847,7 +857,7 @@ class CourseDetails extends StatelessWidget {
     final ScrollController moduleScrollController = ScrollController();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F8FC), 
+      backgroundColor: const Color(0xFFF2F8FC),
       body: SafeArea(
         child: Column(
           children: [
@@ -944,4 +954,383 @@ class CourseDetails extends StatelessWidget {
       ),
     );
   }
+}
+
+class DetailsPage extends StatefulWidget {
+  const DetailsPage({super.key});
+
+  @override
+  State<DetailsPage> createState() => _DetailsPageState();
+}
+
+class _DetailsPageState extends State<DetailsPage> {
+  List<SubmittedFile> submittedFiles = [];
+  bool _isUploading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          buildHeader(context),
+          Expanded(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 24.0),
+                  padding: const EdgeInsets.all(24.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        spreadRadius: 1,
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Due Date: October 30, 2024',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16.0),
+                      ),
+                      const SizedBox(height: 16.0),
+                      Container(
+                        padding: const EdgeInsets.all(12.0),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.warning_amber_rounded,
+                                color: Colors.red, size: 20.0),
+                            SizedBox(width: 8.0),
+                            Expanded(
+                              child: Text(
+                                'Submit before the due date to avoid penalties.',
+                                style: TextStyle(
+                                    color: Colors.red, fontSize: 14.0),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24.0),
+                      const Text(
+                        'Task Description',
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8.0),
+                      const Text(
+                        'Write a report on the impacts of technology on education.',
+                        style: TextStyle(fontSize: 14.0),
+                      ),
+                      const SizedBox(height: 24.0),
+                      // File Upload Section
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Your Submission',
+                                style: TextStyle(
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              if (submittedFiles.isNotEmpty)
+                                TextButton.icon(
+                                  onPressed: () {
+                                    setState(() {
+                                      submittedFiles.clear();
+                                    });
+                                  },
+                                  icon: const Icon(Icons.delete_outline,
+                                      size: 20),
+                                  label: const Text('Clear all'),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: Colors.red,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 16.0),
+                          InkWell(
+                            onTap: _isUploading ? null : _handleFileUpload,
+                            child: Container(
+                              padding: const EdgeInsets.all(20.0),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.grey.shade300,
+                                ),
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.cloud_upload_outlined,
+                                    size: 48.0,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                  const SizedBox(height: 12.0),
+                                  Text(
+                                    _isUploading
+                                        ? 'Uploading...'
+                                        : 'Click to upload your file',
+                                    style: TextStyle(
+                                      color: Colors.grey.shade600,
+                                      fontSize: 14.0,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8.0),
+                                  Text(
+                                    'Supported formats: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX',
+                                    style: TextStyle(
+                                      color: Colors.grey.shade500,
+                                      fontSize: 12.0,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16.0),
+                          // Display uploaded files
+                          ...submittedFiles.map((file) => _buildFileItem(file)),
+                          if (submittedFiles.isNotEmpty) ...[
+                            const SizedBox(height: 24.0),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'Assignment submitted successfully!'),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF2C9B44),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 16.0),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Submit Assignment',
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    color: Color(0xFFF2F8FC),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFileItem(SubmittedFile file) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8.0),
+      padding: const EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF2F2F2),
+        borderRadius: BorderRadius.circular(8.0),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Row(
+        children: [
+          Icon(_getFileIcon(file.fileType),
+              color: _getFileColor(file.fileType), size: 24.0),
+          const SizedBox(width: 10.0),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  file.fileName,
+                  style: const TextStyle(
+                      fontSize: 14.0, fontWeight: FontWeight.w500),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  'Uploaded ${_formatDate(file.uploadTime)} • ${file.fileSize}',
+                  style: TextStyle(
+                    fontSize: 12.0,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline, color: Colors.red),
+            onPressed: () {
+              setState(() {
+                submittedFiles.remove(file);
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleFileUpload() async {
+    // Simulate file upload
+    setState(() => _isUploading = true);
+
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 2));
+
+    setState(() {
+      _isUploading = false;
+      submittedFiles.add(
+        SubmittedFile(
+          fileName: 'Assignment_Report.docx',
+          fileSize: '2.5 MB',
+          uploadTime: DateTime.now(),
+          fileType: 'docx',
+        ),
+      );
+    });
+
+    // Show success message
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('File uploaded successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  }
+
+  IconData _getFileIcon(String fileType) {
+    switch (fileType.toLowerCase()) {
+      case 'pdf':
+        return Icons.picture_as_pdf;
+      case 'doc':
+      case 'docx':
+        return Icons.description;
+      case 'ppt':
+      case 'pptx':
+        return Icons.slideshow;
+      case 'xls':
+      case 'xlsx':
+        return Icons.table_chart;
+      default:
+        return Icons.insert_drive_file;
+    }
+  }
+
+  Color _getFileColor(String fileType) {
+    switch (fileType.toLowerCase()) {
+      case 'pdf':
+        return Colors.red;
+      case 'doc':
+      case 'docx':
+        return Colors.blue;
+      case 'ppt':
+      case 'pptx':
+        return Colors.orange;
+      case 'xls':
+      case 'xlsx':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
+  Widget buildHeader(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double fontSize = screenWidth < 600 ? 14.0 : 18.0;
+    double padding = screenWidth < 600 ? 12.0 : 16.0;
+    double iconSize = screenWidth < 600 ? 15.0 : 20.0;
+    double iconPadding = screenWidth < 600 ? 0.0 : 8.0;
+    double logoSize = screenWidth < 600 ? 20.0 : 30.0;
+    double logoIconSize = screenWidth < 600 ? 20.0 : 30.0;
+
+    return Container(
+      color: const Color(0xFF2C9B44),
+      padding: EdgeInsets.all(padding),
+      child: Row(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(iconPadding),
+            child: IconButton(
+              iconSize: iconSize,
+              icon: const Icon(Icons.arrow_back_ios, color: Color(0xFFF2F8FC)),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ),
+          SizedBox(width: screenWidth < 600 ? 2.0 : 6.0),
+          CircleAvatar(
+            radius: logoSize,
+            backgroundColor: const Color(0xFFF2F8FC),
+            child: Icon(Icons.school, size: logoIconSize, color: Colors.green),
+          ),
+          const SizedBox(width: 8.0),
+          Expanded(
+            child: Text(
+              'Pamantasan ng Lungsod ng San Pablo',
+              style: TextStyle(
+                fontSize: fontSize,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFFF2F8FC),
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SubmittedFile {
+  final String fileName;
+  final String fileSize;
+  final DateTime uploadTime;
+  final String fileType;
+
+  SubmittedFile({
+    required this.fileName,
+    required this.fileSize,
+    required this.uploadTime,
+    required this.fileType,
+  });
 }
