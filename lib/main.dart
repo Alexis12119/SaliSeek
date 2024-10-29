@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
 
 void main() {
   runApp(const MyApp());
@@ -984,15 +986,18 @@ class StudentDashboardState extends State<StudentDashboard> {
                   return AlertDialog(
                     title: const Text('Confirm Logout'),
                     content: const Text('Are you sure you want to log out?'),
+                    backgroundColor: const Color(0xFF2C9B44).withOpacity(0.9),
                     actions: <Widget>[
                       TextButton(
-                        child: const Text('No'),
+                        child: const Text('No',
+                            style: TextStyle(color: Colors.black)),
                         onPressed: () {
                           Navigator.of(context).pop(); // Close the dialog
                         },
                       ),
                       TextButton(
-                        child: const Text('Yes'),
+                        child: const Text('Yes',
+                            style: TextStyle(color: Colors.black)),
                         onPressed: () {
                           // Implement logout functionality here
                           Navigator.pushReplacement(
@@ -1332,7 +1337,15 @@ class CourseTile extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8.0),
-          color: const Color(0xFFE0E0E0), // Light gray background for the tile
+          color: Colors.white, // Light gray background for the tile
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -1735,6 +1748,20 @@ class CourseDetails extends StatelessWidget {
   }
 }
 
+class SubmittedFile {
+  final String fileName;
+  final String fileSize;
+  final DateTime uploadTime;
+  final String fileType;
+
+  SubmittedFile({
+    required this.fileName,
+    required this.fileSize,
+    required this.uploadTime,
+    required this.fileType,
+  });
+}
+
 class DetailsPage extends StatefulWidget {
   const DetailsPage({super.key});
 
@@ -1744,7 +1771,7 @@ class DetailsPage extends StatefulWidget {
 
 class _DetailsPageState extends State<DetailsPage> {
   List<SubmittedFile> submittedFiles = [];
-  bool _isUploading = false;
+  final bool _isUploading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -1807,9 +1834,7 @@ class _DetailsPageState extends State<DetailsPage> {
                       const Text(
                         'Task Description',
                         style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.bold,
-                        ),
+                            fontSize: 16.0, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8.0),
                       const Text(
@@ -1827,9 +1852,8 @@ class _DetailsPageState extends State<DetailsPage> {
                               const Text(
                                 'Your Submission',
                                 style: TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold),
                               ),
                               if (submittedFiles.isNotEmpty)
                                 TextButton.icon(
@@ -1984,32 +2008,37 @@ class _DetailsPageState extends State<DetailsPage> {
   }
 
   Future<void> _handleFileUpload() async {
-    // Simulate file upload
-    setState(() => _isUploading = true);
+    // Open file picker
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
 
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 2));
+    if (result != null) {
+      // Get the selected file's properties
+      String fileName = result.files.single.name;
+      String fileSize =
+          '${(result.files.single.size / 1024).toStringAsFixed(2)} KB'; // Size in KB
+      String fileType = result.files.single.extension ?? 'unknown';
 
-    setState(() {
-      _isUploading = false;
-      submittedFiles.add(
-        SubmittedFile(
-          fileName: 'Assignment_Report.docx',
-          fileSize: '2.5 MB',
-          uploadTime: DateTime.now(),
-          fileType: 'docx',
-        ),
-      );
-    });
+      // Add the file to the submitted files list
+      setState(() {
+        submittedFiles.add(
+          SubmittedFile(
+            fileName: fileName,
+            fileSize: fileSize,
+            uploadTime: DateTime.now(),
+            fileType: fileType,
+          ),
+        );
+      });
 
-    // Show success message
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('File uploaded successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      // Show success message if the widget is still mounted
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('File selected successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     }
   }
 
@@ -2135,18 +2164,4 @@ class _DetailsPageState extends State<DetailsPage> {
       ),
     );
   }
-}
-
-class SubmittedFile {
-  final String fileName;
-  final String fileSize;
-  final DateTime uploadTime;
-  final String fileType;
-
-  SubmittedFile({
-    required this.fileName,
-    required this.fileSize,
-    required this.uploadTime,
-    required this.fileType,
-  });
 }
