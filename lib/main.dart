@@ -103,6 +103,8 @@ class _LoginPageState extends State<LoginPage> {
     // Set font size and padding based on the screen width
     double fontSize =
         screenWidth < 600 ? 14.0 : 18.0; // Smaller font for narrow screens
+    double subtitleFontSize =
+        screenWidth < 600 ? 10.0 : 12.0; // Adjust subtitle font size
     double padding =
         screenWidth < 600 ? 12.0 : 16.0; // Smaller padding for narrow screens
     double avatarSize = screenWidth < 600
@@ -123,17 +125,48 @@ class _LoginPageState extends State<LoginPage> {
           ),
           SizedBox(width: spacing), // Responsive spacing
 
-          // Expanding the text to prevent overflow
+          // Expanded column for title and subtitles
           Expanded(
-            child: Text(
-              'Pamantasan ng Lungsod ng San Pablo',
-              style: TextStyle(
-                fontSize: fontSize,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-              maxLines: 1, // Restrict to one line
-              overflow: TextOverflow.ellipsis, // Add ellipsis if text overflows
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Pamantasan ng Lungsod ng San Pablo',
+                  style: TextStyle(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  maxLines: 1, // Restrict to one line
+                  overflow:
+                      TextOverflow.ellipsis, // Add ellipsis if text overflows
+                ),
+                const SizedBox(
+                    height: 4.0), // Spacing between title and subtitles
+
+                // Subtitle lines
+                Text(
+                  'Brgy. San Jose, San Pablo City',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                    color: const Color(0xFFF2F8FC),
+                  ),
+                ),
+                Text(
+                  'Tel No: (049) 536-7380',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                    color: const Color(0xFFF2F8FC),
+                  ),
+                ),
+                Text(
+                  'Email Address: plspofficial@plsp.edu.ph',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                    color: const Color(0xFFF2F8FC),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -241,16 +274,17 @@ class StudentDashboardState extends State<StudentDashboard> {
     // Get the screen width
     double screenWidth = MediaQuery.of(context).size.width;
 
-    // Set font size, padding, avatar size, and spacing based on the screen width
+    // Set font size, padding, spacing, and logo icon size based on the screen width
     double fontSize =
         screenWidth < 600 ? 14.0 : 18.0; // Smaller font for narrow screens
+    double subtitleFontSize =
+        screenWidth < 600 ? 10.0 : 12.0; // Adjust subtitle font size
     double padding =
         screenWidth < 600 ? 12.0 : 16.0; // Smaller padding for narrow screens
     double spacing =
         screenWidth < 600 ? 12.0 : 16.0; // Adjust spacing for narrow screens
-    double logoIconSize = screenWidth < 600
-        ? 20.0
-        : 30.0; // Adjust the size of the logo icon inside the CircleAvatar
+    double logoIconSize =
+        screenWidth < 600 ? 20.0 : 30.0; // Adjust the size of the logo icon
 
     return Container(
       color: const Color(0xFF2C9B44),
@@ -263,19 +297,54 @@ class StudentDashboardState extends State<StudentDashboard> {
               CircleAvatar(
                 radius: logoIconSize, // Responsive size for logo
                 backgroundColor: const Color(0xFFF2F8FC),
-                child: const Icon(Icons.school, size: 30, color: Colors.green),
+                child:
+                    Icon(Icons.school, size: logoIconSize, color: Colors.green),
               ),
               SizedBox(width: spacing), // Responsive spacing
-              Text(
-                'Pamantasan ng Lungsod ng San Pablo',
-                style: TextStyle(
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+
+              // Column for title and subtitles
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Pamantasan ng Lungsod ng San Pablo',
+                    style: TextStyle(
+                      fontSize: fontSize,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(
+                      height: 4.0), // Space between title and subtitle lines
+
+                  // Subtitle lines
+                  Text(
+                    'Brgy. San Jose, San Pablo City',
+                    style: TextStyle(
+                      fontSize: subtitleFontSize,
+                      color: const Color(0xFFF2F8FC),
+                    ),
+                  ),
+                  Text(
+                    'Tel No: (049) 536-7380',
+                    style: TextStyle(
+                      fontSize: subtitleFontSize,
+                      color: const Color(0xFFF2F8FC),
+                    ),
+                  ),
+                  Text(
+                    'Email Address: plspofficial@plsp.edu.ph',
+                    style: TextStyle(
+                      fontSize: subtitleFontSize,
+                      color: const Color(0xFFF2F8FC),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
+
+          // Logout button
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
             onPressed: () {
@@ -437,7 +506,8 @@ class SemesterTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 8.0, bottom: 8.0),
+      padding:
+          const EdgeInsets.only(left: 8.0, right: 8.0, top: 8.0, bottom: 8.0),
       child: Container(
         width: 150,
         decoration: BoxDecoration(
@@ -525,15 +595,15 @@ class ViewGradeDetails extends StatelessWidget {
     // Get the screen width
     double screenWidth = MediaQuery.of(context).size.width;
 
-    // Set font size, padding, and avatar size based on the screen width
-    double fontSize =
-        screenWidth < 600 ? 14.0 : 18.0; // Smaller font for narrow screens
+    // Set font size, padding, and icon/avatar sizes based on the screen width
+    double fontSize = screenWidth < 600 ? 14.0 : 18.0; // Font size for title
+    double subtitleFontSize =
+        screenWidth < 600 ? 10.0 : 12.0; // Font size for subtitle
     double padding =
-        screenWidth < 600 ? 12.0 : 16.0; // Adjust padding for narrow screens
-    double iconSize = screenWidth < 600 ? 15.0 : 20.0; // Adjust icon size
-    double logoIconSize = screenWidth < 600
-        ? 20.0
-        : 30.0; // Adjust the size of the logo icon inside the CircleAvatar
+        screenWidth < 600 ? 12.0 : 16.0; // Padding for narrow screens
+    double iconSize = screenWidth < 600 ? 15.0 : 20.0; // Back icon size
+    double logoIconSize = screenWidth < 600 ? 20.0 : 30.0; // Logo size
+
     return Container(
       color: const Color(0xFF2C9B44),
       padding: EdgeInsets.all(padding), // Responsive padding
@@ -541,8 +611,11 @@ class ViewGradeDetails extends StatelessWidget {
         children: [
           // Back button
           IconButton(
-            icon: Icon(Icons.arrow_back_ios,
-                color: Colors.white, size: iconSize), // Responsive icon size
+            icon: Icon(
+              Icons.arrow_back_ios,
+              color: Colors.white,
+              size: iconSize, // Responsive icon size
+            ),
             onPressed: () {
               Navigator.pop(context); // Go back to the previous screen
             },
@@ -556,22 +629,50 @@ class ViewGradeDetails extends StatelessWidget {
             child: Icon(
               Icons.school,
               size: logoIconSize,
-              color: Colors.green, // Responsive icon size
+              color: Colors.green, // Icon color
             ),
           ),
-          SizedBox(
-              width: screenWidth < 600 ? 12.0 : 16.0), // Responsive spacing
+          SizedBox(width: screenWidth < 600 ? 12.0 : 16.0), // Spacing
 
-          // University name with responsive font size
+          // Column with title and subtitle
           Expanded(
-            child: Text(
-              'Pamantasan ng Lungsod ng San Pablo',
-              style: TextStyle(
-                fontSize: fontSize, // Responsive font size
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-              overflow: TextOverflow.ellipsis, // Handles text overflow
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Pamantasan ng Lungsod ng San Pablo',
+                  style: TextStyle(
+                    fontSize: fontSize, // Responsive title font size
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4.0), // Space between title and subtitle
+
+                // Subtitle text
+                Text(
+                  'Brgy. San Jose, San Pablo City',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                    color: const Color(0xFFF2F8FC),
+                  ),
+                ),
+                Text(
+                  'Tel No: (049) 536-7380',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                    color: const Color(0xFFF2F8FC),
+                  ),
+                ),
+                Text(
+                  'Email Address: plspofficial@plsp.edu.ph',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                    color: const Color(0xFFF2F8FC),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -924,6 +1025,8 @@ class CourseDetails extends StatelessWidget {
   Widget buildHeader(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double fontSize = screenWidth < 600 ? 14.0 : 18.0;
+    double subtitleFontSize =
+        screenWidth < 600 ? 10.0 : 12.0; // Subtitle font size
     double padding = screenWidth < 600 ? 12.0 : 16.0;
     double iconSize = screenWidth < 600 ? 15.0 : 20.0;
     double iconPadding = screenWidth < 600 ? 0.0 : 8.0;
@@ -946,21 +1049,55 @@ class CourseDetails extends StatelessWidget {
             ),
           ),
           SizedBox(width: screenWidth < 600 ? 2.0 : 6.0),
+
+          // Logo
           CircleAvatar(
             radius: logoSize,
             backgroundColor: const Color(0xFFF2F8FC),
             child: Icon(Icons.school, size: logoIconSize, color: Colors.green),
           ),
+
           const SizedBox(width: 8.0),
+
+          // Column for Title and Subtitle
           Expanded(
-            child: Text(
-              'Pamantasan ng Lungsod ng San Pablo',
-              style: TextStyle(
-                fontSize: fontSize,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-              overflow: TextOverflow.ellipsis,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Pamantasan ng Lungsod ng San Pablo',
+                  style: TextStyle(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4.0), // Space between title and subtitle
+
+                // Subtitle details
+                Text(
+                  'Brgy. San Jose, San Pablo City',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                    color: const Color(0xFFF2F8FC),
+                  ),
+                ),
+                Text(
+                  'Tel No: (049) 536-7380',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                    color: const Color(0xFFF2F8FC),
+                  ),
+                ),
+                Text(
+                  'Email Address: plspofficial@plsp.edu.ph',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                    color: const Color(0xFFF2F8FC),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -1140,7 +1277,7 @@ class _DetailsPageState extends State<DetailsPage> {
                                   );
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFF2F8FC),
+                                  backgroundColor: const Color(0xFF2C9B44),
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 16.0),
                                   shape: RoundedRectangleBorder(
@@ -1290,6 +1427,8 @@ class _DetailsPageState extends State<DetailsPage> {
   Widget buildHeader(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double fontSize = screenWidth < 600 ? 14.0 : 18.0;
+    double subtitleFontSize =
+        screenWidth < 600 ? 10.0 : 12.0; // Subtitle font size
     double padding = screenWidth < 600 ? 12.0 : 16.0;
     double iconSize = screenWidth < 600 ? 15.0 : 20.0;
     double iconPadding = screenWidth < 600 ? 0.0 : 8.0;
@@ -1312,21 +1451,55 @@ class _DetailsPageState extends State<DetailsPage> {
             ),
           ),
           SizedBox(width: screenWidth < 600 ? 2.0 : 6.0),
+
+          // Logo
           CircleAvatar(
             radius: logoSize,
             backgroundColor: const Color(0xFFF2F8FC),
             child: Icon(Icons.school, size: logoIconSize, color: Colors.green),
           ),
+
           const SizedBox(width: 8.0),
+
+          // Column for Title and Subtitle
           Expanded(
-            child: Text(
-              'Pamantasan ng Lungsod ng San Pablo',
-              style: TextStyle(
-                fontSize: fontSize,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-              overflow: TextOverflow.ellipsis,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Pamantasan ng Lungsod ng San Pablo',
+                  style: TextStyle(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4.0), // Space between title and subtitle
+
+                // Subtitle details
+                Text(
+                  'Brgy. San Jose, San Pablo City',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                    color: const Color(0xFFF2F8FC),
+                  ),
+                ),
+                Text(
+                  'Tel No: (049) 536-7380',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                    color: const Color(0xFFF2F8FC),
+                  ),
+                ),
+                Text(
+                  'Email Address: plspofficial@plsp.edu.ph',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                    color: const Color(0xFFF2F8FC),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
