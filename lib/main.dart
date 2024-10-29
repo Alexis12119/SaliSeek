@@ -130,7 +130,7 @@ class _LoginPageState extends State<LoginPage> {
               style: TextStyle(
                 fontSize: fontSize,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFFF2F8FC),
+                color: Colors.white,
               ),
               maxLines: 1, // Restrict to one line
               overflow: TextOverflow.ellipsis, // Add ellipsis if text overflows
@@ -271,13 +271,13 @@ class StudentDashboardState extends State<StudentDashboard> {
                 style: TextStyle(
                   fontSize: fontSize,
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFFF2F8FC),
+                  color: Colors.white,
                 ),
               ),
             ],
           ),
           IconButton(
-            icon: const Icon(Icons.logout, color: Color(0xFFF2F8FC)),
+            icon: const Icon(Icons.logout, color: Colors.white),
             onPressed: () {
               // Show confirmation dialog before logging out
               showDialog(
@@ -437,12 +437,20 @@ class SemesterTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 16.0),
+      padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 8.0, bottom: 8.0),
       child: Container(
         width: 150,
         decoration: BoxDecoration(
-          color: const Color(0xFF2C9B44),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(8.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 3,
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Center(
           child: Padding(
@@ -451,7 +459,7 @@ class SemesterTile extends StatelessWidget {
               title,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Color(0xFFF2F8FC),
+                color: Colors.black,
                 fontSize: 16.0,
               ),
             ),
@@ -534,8 +542,7 @@ class ViewGradeDetails extends StatelessWidget {
           // Back button
           IconButton(
             icon: Icon(Icons.arrow_back_ios,
-                color: const Color(0xFFF2F8FC),
-                size: iconSize), // Responsive icon size
+                color: Colors.white, size: iconSize), // Responsive icon size
             onPressed: () {
               Navigator.pop(context); // Go back to the previous screen
             },
@@ -546,9 +553,11 @@ class ViewGradeDetails extends StatelessWidget {
           CircleAvatar(
             radius: logoIconSize, // Responsive avatar size
             backgroundColor: const Color(0xFFF2F8FC),
-            child: Icon(Icons.school,
-                size: logoIconSize,
-                color: const Color(0xFF2C9B44)), // Responsive icon size
+            child: Icon(
+              Icons.school,
+              size: logoIconSize,
+              color: Colors.green, // Responsive icon size
+            ),
           ),
           SizedBox(
               width: screenWidth < 600 ? 12.0 : 16.0), // Responsive spacing
@@ -560,7 +569,7 @@ class ViewGradeDetails extends StatelessWidget {
               style: TextStyle(
                 fontSize: fontSize, // Responsive font size
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFFF2F8FC),
+                color: Colors.white,
               ),
               overflow: TextOverflow.ellipsis, // Handles text overflow
             ),
@@ -930,7 +939,7 @@ class CourseDetails extends StatelessWidget {
             padding: EdgeInsets.all(iconPadding),
             child: IconButton(
               iconSize: iconSize,
-              icon: const Icon(Icons.arrow_back_ios, color: Color(0xFFF2F8FC)),
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
               onPressed: () {
                 Navigator.pop(context);
               },
@@ -949,7 +958,7 @@ class CourseDetails extends StatelessWidget {
               style: TextStyle(
                 fontSize: fontSize,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFFF2F8FC),
+                color: Colors.white,
               ),
               overflow: TextOverflow.ellipsis,
             ),
@@ -991,9 +1000,9 @@ class _DetailsPageState extends State<DetailsPage> {
                     borderRadius: BorderRadius.circular(12.0),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        spreadRadius: 1,
-                        blurRadius: 10,
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 5,
+                        blurRadius: 7,
                         offset: const Offset(0, 2),
                       ),
                     ],
@@ -1076,6 +1085,7 @@ class _DetailsPageState extends State<DetailsPage> {
                           InkWell(
                             onTap: _isUploading ? null : _handleFileUpload,
                             child: Container(
+                              width: double.infinity,
                               padding: const EdgeInsets.all(20.0),
                               decoration: BoxDecoration(
                                 border: Border.all(
@@ -1130,7 +1140,7 @@ class _DetailsPageState extends State<DetailsPage> {
                                   );
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF2C9B44),
+                                  backgroundColor: const Color(0xFFF2F8FC),
                                   padding: const EdgeInsets.symmetric(
                                       vertical: 16.0),
                                   shape: RoundedRectangleBorder(
@@ -1295,7 +1305,7 @@ class _DetailsPageState extends State<DetailsPage> {
             padding: EdgeInsets.all(iconPadding),
             child: IconButton(
               iconSize: iconSize,
-              icon: const Icon(Icons.arrow_back_ios, color: Color(0xFFF2F8FC)),
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
               onPressed: () {
                 Navigator.pop(context);
               },
@@ -1314,7 +1324,7 @@ class _DetailsPageState extends State<DetailsPage> {
               style: TextStyle(
                 fontSize: fontSize,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFFF2F8FC),
+                color: Colors.white,
               ),
               overflow: TextOverflow.ellipsis,
             ),
