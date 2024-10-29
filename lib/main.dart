@@ -221,8 +221,8 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget buildHeader() {
     double screenWidth = MediaQuery.of(context).size.width;
-    double fontSize = screenWidth < 600 ? 14.0 : 18.0;
-    double subtitleFontSize = screenWidth < 600 ? 10.0 : 12.0;
+    double fontSize = screenWidth < 600 ? 10.0 : 18.0;
+    double subtitleFontSize = screenWidth < 600 ? 9.0 : 12.0;
     double padding = screenWidth < 600 ? 12.0 : 16.0;
     double avatarSize = screenWidth < 600 ? 25.0 : 30.0;
     double spacing = screenWidth < 600 ? 12.0 : 16.0;
@@ -419,8 +419,8 @@ class _VerifyStudentIdPageState extends State<VerifyStudentIdPage> {
 
   Widget buildHeader() {
     double screenWidth = MediaQuery.of(context).size.width;
-    double fontSize = screenWidth < 600 ? 14.0 : 18.0;
-    double subtitleFontSize = screenWidth < 600 ? 10.0 : 12.0;
+    double fontSize = screenWidth < 600 ? 10.0 : 18.0;
+    double subtitleFontSize = screenWidth < 600 ? 9.0 : 12.0;
     double padding = screenWidth < 600 ? 12.0 : 16.0;
     double avatarSize = screenWidth < 600 ? 25.0 : 30.0;
     double spacing = screenWidth < 600 ? 12.0 : 16.0;
@@ -675,8 +675,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
   Widget buildHeader() {
     double screenWidth = MediaQuery.of(context).size.width;
-    double fontSize = screenWidth < 600 ? 14.0 : 18.0;
-    double subtitleFontSize = screenWidth < 600 ? 10.0 : 12.0;
+    double fontSize = screenWidth < 600 ? 10.0 : 18.0;
+    double subtitleFontSize = screenWidth < 600 ? 9.0 : 12.0;
     double padding = screenWidth < 600 ? 12.0 : 16.0;
     double avatarSize = screenWidth < 600 ? 25.0 : 30.0;
     double spacing = screenWidth < 600 ? 12.0 : 16.0;
@@ -917,8 +917,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   Widget buildHeader() {
     double screenWidth = MediaQuery.of(context).size.width;
-    double fontSize = screenWidth < 600 ? 14.0 : 18.0;
-    double subtitleFontSize = screenWidth < 600 ? 10.0 : 12.0;
+    double fontSize = screenWidth < 600 ? 10.0 : 18.0;
+    double subtitleFontSize = screenWidth < 600 ? 9.0 : 12.0;
     double padding = screenWidth < 600 ? 12.0 : 16.0;
     double avatarSize = screenWidth < 600 ? 25.0 : 30.0;
     double spacing = screenWidth < 600 ? 12.0 : 16.0;
@@ -1085,9 +1085,9 @@ class StudentDashboardState extends State<StudentDashboard> {
 
     // Set font size, padding, spacing, and logo icon size based on the screen width
     double fontSize =
-        screenWidth < 600 ? 14.0 : 18.0; // Smaller font for narrow screens
+        screenWidth < 600 ? 10.0 : 18.0; // Smaller font for narrow screens
     double subtitleFontSize =
-        screenWidth < 600 ? 10.0 : 12.0; // Adjust subtitle font size
+        screenWidth < 600 ? 9.0 : 12.0; // Adjust subtitle font size
     double padding =
         screenWidth < 600 ? 12.0 : 16.0; // Smaller padding for narrow screens
     double spacing =
@@ -1162,7 +1162,7 @@ class StudentDashboardState extends State<StudentDashboard> {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: const Text('Confirm Logout'),
+                    title: const Text('Confirm Logout', style: TextStyle(fontWeight: FontWeight.bold)),
                     content: const Text('Are you sure you want to log out?'),
                     backgroundColor: const Color(0xFF2C9B44).withOpacity(0.9),
                     actions: <Widget>[
@@ -1408,9 +1408,9 @@ class ViewGradeDetails extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width;
 
     // Set font size, padding, and icon/avatar sizes based on the screen width
-    double fontSize = screenWidth < 600 ? 14.0 : 18.0; // Font size for title
+    double fontSize = screenWidth < 600 ? 10.0 : 18.0; // Font size for title
     double subtitleFontSize =
-        screenWidth < 600 ? 10.0 : 12.0; // Font size for subtitle
+        screenWidth < 600 ? 9.0 : 12.0; // Font size for subtitle
     double padding =
         screenWidth < 600 ? 12.0 : 16.0; // Padding for narrow screens
     double iconSize = screenWidth < 600 ? 15.0 : 20.0; // Back icon size
@@ -1510,12 +1510,21 @@ class CourseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    // Adjust font sizes and padding for different screen widths
+    double fontSize = screenWidth < 600 ? 14.0 : 18.0;
+    double gradeFontSize = screenWidth < 600 ? 12.0 : 16.0;
+    double padding = screenWidth < 600 ? 8.0 : 16.0;
+    double tilesPadding = screenWidth < 600 ? 16.0 : 26.0;
+    double gradeSpacing = screenWidth < 600 ? 16.0 : 24.0;
+
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: EdgeInsets.all(padding),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8.0),
-          color: Colors.white, // Light gray background for the tile
+          color: Colors.white,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.2),
@@ -1526,26 +1535,26 @@ class CourseTile extends StatelessWidget {
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(tilesPadding),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Course Code and Name inside a Column, left side
+              // Course Code and Name on the left
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     courseCode,
-                    style: const TextStyle(
-                      fontSize: 18.0,
+                    style: TextStyle(
+                      fontSize: fontSize,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 4.0),
-                  Text(courseName),
+                  Text(courseName, style: TextStyle(fontSize: fontSize - 2)),
                 ],
               ),
-              // Grades side, aligned to the right
+              // Grades on the right
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -1553,32 +1562,31 @@ class CourseTile extends StatelessWidget {
                     children: [
                       Text(
                         midtermGrade,
-                        style: const TextStyle(
-                          fontSize: 16.0,
+                        style: TextStyle(
+                          fontSize: gradeFontSize,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(
-                          width: 24.0), // Spacing between Midterm and Finals
+                      SizedBox(width: gradeSpacing),
                       Text(
                         finalGrade,
-                        style: const TextStyle(
-                          fontSize: 16.0,
+                        style: TextStyle(
+                          fontSize: gradeFontSize,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
-                  const Row(
+                  Row(
                     children: [
                       Text(
                         'Midterm',
-                        style: TextStyle(fontSize: 14.0),
+                        style: TextStyle(fontSize: gradeFontSize - 2),
                       ),
-                      SizedBox(width: 20.0),
+                      SizedBox(width: gradeSpacing - 4),
                       Text(
                         'Finals',
-                        style: TextStyle(fontSize: 14.0),
+                        style: TextStyle(fontSize: gradeFontSize - 2),
                       ),
                     ],
                   ),
@@ -1844,9 +1852,9 @@ class CourseDetails extends StatelessWidget {
 
   Widget buildHeader(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double fontSize = screenWidth < 600 ? 14.0 : 18.0;
+    double fontSize = screenWidth < 600 ? 10.0 : 18.0;
     double subtitleFontSize =
-        screenWidth < 600 ? 10.0 : 12.0; // Subtitle font size
+        screenWidth < 600 ? 9.0 : 12.0; // Subtitle font size
     double padding = screenWidth < 600 ? 12.0 : 16.0;
     double iconSize = screenWidth < 600 ? 15.0 : 20.0;
     double iconPadding = screenWidth < 600 ? 0.0 : 8.0;
@@ -2262,9 +2270,9 @@ class _DetailsPageState extends State<DetailsPage> {
 
   Widget buildHeader(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    double fontSize = screenWidth < 600 ? 14.0 : 18.0;
+    double fontSize = screenWidth < 600 ? 10.0 : 18.0;
     double subtitleFontSize =
-        screenWidth < 600 ? 10.0 : 12.0; // Subtitle font size
+        screenWidth < 600 ? 9.0 : 12.0; // Subtitle font size
     double padding = screenWidth < 600 ? 12.0 : 16.0;
     double iconSize = screenWidth < 600 ? 15.0 : 20.0;
     double iconPadding = screenWidth < 600 ? 0.0 : 8.0;
