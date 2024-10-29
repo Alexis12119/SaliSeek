@@ -537,7 +537,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                           ),
                           const SizedBox(height: 20.0),
-                                const SizedBox(height: 16.0),
+                          const SizedBox(height: 16.0),
                           const Text(
                             'Last Name',
                             style: TextStyle(
@@ -1004,7 +1004,7 @@ class StudentDashboardState extends State<StudentDashboard> {
               // Profile Section
               buildProfileSection(),
 
-              // View Grades Section
+// View Grades Section
               buildSectionWithArrows(
                 title: 'View Grades:',
                 scrollController: _gradeScrollController,
@@ -1026,9 +1026,11 @@ class StudentDashboardState extends State<StudentDashboard> {
                     ),
                   );
                 },
+                tileType: (title) =>
+                    SemesterTile(title), // Use SemesterTile here
               ),
 
-              // Courses Section
+// Courses Section
               buildSectionWithArrows(
                 title: 'Courses:',
                 scrollController: _courseScrollController,
@@ -1050,8 +1052,10 @@ class StudentDashboardState extends State<StudentDashboard> {
                     ),
                   );
                 },
+                tileType: (title) => ClassTile(title), // Use ClassTile here
               ),
-              // Archived Classes Section
+
+// Archived Classes Section
               buildSectionWithArrows(
                 title: 'Archived Classes:',
                 scrollController: _archivedScrollController,
@@ -1070,6 +1074,7 @@ class StudentDashboardState extends State<StudentDashboard> {
                     ),
                   );
                 },
+                tileType: (title) => ClassTile(title), // Use ClassTile here
               ),
             ],
           ),
@@ -1162,7 +1167,8 @@ class StudentDashboardState extends State<StudentDashboard> {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: const Text('Confirm Logout', style: TextStyle(fontWeight: FontWeight.bold)),
+                    title: const Text('Confirm Logout',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
                     content: const Text('Are you sure you want to log out?'),
                     backgroundColor: const Color(0xFF2C9B44).withOpacity(0.9),
                     actions: <Widget>[
@@ -1246,74 +1252,113 @@ class StudentDashboardState extends State<StudentDashboard> {
     required ScrollController scrollController,
     required List<String> items,
     required Function(String)? onTilePressed,
+    required Widget Function(String) tileType,
   }) {
     return Container(
-        color: const Color(0xFFF2F8FC),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                ),
+      color: const Color(0xFFF2F8FC),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Title with its own padding
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(
+          ),
+          // Padding around the box with tiles
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30.0),
+            child: SizedBox(
               height: 150,
               child: Row(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios),
-                    onPressed: () {
-                      scrollController.animateTo(
-                        scrollController.offset - 150,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.ease,
-                      );
-                    },
-                  ),
                   Expanded(
                     child: ListView.builder(
                       controller: scrollController,
                       scrollDirection: Axis.horizontal,
                       itemCount: items.length,
                       itemBuilder: (context, index) {
-                        return GestureDetector(
-                          onTap: onTilePressed != null
-                              ? () => onTilePressed(items[index])
-                              : null,
-                          child: SemesterTile(items[index]),
+                        final tile = tileType(items[index]);
+
+                        return Padding(
+                          padding: tile is SemesterTile
+                              ? const EdgeInsets.symmetric(
+                                  horizontal:
+                                      2.0) // Additional spacing for SemesterTile
+                              : const EdgeInsets.symmetric(
+                                  horizontal:
+                                      2.0), // Default spacing for other tiles
+                          child: GestureDetector(
+                            onTap: onTilePressed != null
+                                ? () => onTilePressed(items[index])
+                                : null,
+                            child: tile,
+                          ),
                         );
                       },
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.arrow_forward_ios),
-                    onPressed: () {
-                      scrollController.animateTo(
-                        scrollController.offset + 150,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.ease,
-                      );
-                    },
-                  ),
                 ],
               ),
             ),
-          ],
-        ));
+          ),
+        ],
+      ),
+    );
   }
 }
 
-// Semester/Course Tile Widget
 class SemesterTile extends StatelessWidget {
   final String title;
 
   const SemesterTile(this.title, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding:
+          const EdgeInsets.only(left: 8.0, right: 8.0, top: 8.0, bottom: 8.0),
+      child: Container(
+        width: 150,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 3,
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 14.0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ClassTile extends StatelessWidget {
+  final String title;
+
+  const ClassTile(this.title, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -1631,16 +1676,16 @@ class CourseDetails extends StatelessWidget {
             height: 100,
             child: Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back_ios),
-                  onPressed: () {
-                    scrollController.animateTo(
-                      scrollController.offset - 150,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.ease,
-                    );
-                  },
-                ),
+                // IconButton(
+                //   icon: const Icon(Icons.arrow_back_ios),
+                //   onPressed: () {
+                //     scrollController.animateTo(
+                //       scrollController.offset - 150,
+                //       duration: const Duration(milliseconds: 300),
+                //       curve: Curves.ease,
+                //     );
+                //   },
+                // ),
                 Expanded(
                   child: ListView.builder(
                     controller: scrollController,
@@ -1656,16 +1701,16 @@ class CourseDetails extends StatelessWidget {
                     },
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.arrow_forward_ios),
-                  onPressed: () {
-                    scrollController.animateTo(
-                      scrollController.offset + 150,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.ease,
-                    );
-                  },
-                ),
+                // IconButton(
+                //   icon: const Icon(Icons.arrow_forward_ios),
+                //   onPressed: () {
+                //     scrollController.animateTo(
+                //       scrollController.offset + 150,
+                //       duration: const Duration(milliseconds: 300),
+                //       curve: Curves.ease,
+                //     );
+                //   },
+                // ),
               ],
             ),
           ),
