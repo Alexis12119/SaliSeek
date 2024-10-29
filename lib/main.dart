@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 void main() {
   runApp(const MyApp());
@@ -26,106 +27,215 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _studentIdController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF2F8FC),
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Column(
-            children: [
-              buildHeader(), // Header with logo and title
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        controller: _studentIdController,
-                        decoration: const InputDecoration(
-                          labelText: 'Student ID',
-                          border: OutlineInputBorder(),
+          child: Center(
+            // Center the column in the middle of the screen
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center, // Center the column
+              children: [
+                buildHeader(), // Header with logo and title
+                Padding(
+                  padding: const EdgeInsets.all(36.0),
+                  child: Container(
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: const Offset(0, 2),
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your Student ID';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16.0),
-                      TextFormField(
-                        controller: _passwordController,
-                        obscureText: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Password',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your password';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20.0),
-                      ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            // Process login (you can replace this with your own logic)
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const StudentDashboard(),
+                      ],
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Center(
+                            // Center the Login title
+                            child: Text(
+                              'Login', // Title text
+                              style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight:
+                                      FontWeight.bold), // Style for the title
+                            ),
+                          ),
+                          const SizedBox(
+                              height: 20.0), // Spacing between title and form
+                          const Text(
+                            'Student ID',
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 4.0),
+                          TextFormField(
+                            controller: _studentIdController,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter your Student ID',
+                              border: OutlineInputBorder(),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your Student ID';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16.0),
+                          const Text(
+                            'Password',
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 4.0),
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: _obscurePassword,
+                            decoration: InputDecoration(
+                              hintText: 'Enter your password',
+                              border: const OutlineInputBorder(),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePassword
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _obscurePassword = !_obscurePassword;
+                                  });
+                                },
                               ),
-                            );
-                          }
-                        },
-                        child: const Text('Login'),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your password';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20.0),
+                          Center(
+                            child: SizedBox(
+                              width: 150, // Set a fixed width for the button
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF2C9B44),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 12.0), // Smaller height
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        8.0), // Rounded corners
+                                  ),
+                                ),
+                                onPressed: () {
+                                  if (_formKey.currentState!.validate()) {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const StudentDashboard(),
+                                      ),
+                                    );
+                                  }
+                                },
+                                child: const Text(
+                                  'Submit',
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    color: Color(0xFFF2F8FC),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20.0), // Spacing for the links
+                          Center(
+                            child: Column(
+                              children: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const SignUpPage()),
+                                    );
+                                  },
+                                  child: const Text(
+                                    "Don't have an account? Sign Up",
+                                    style: TextStyle(
+                                      color: Colors
+                                          .black, // Change link color to black
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const ForgotPasswordPage()),
+                                    );
+                                  },
+                                  child: const Text(
+                                    'Forgot Password?',
+                                    style: TextStyle(
+                                      color: Colors
+                                          .black, // Change link color to black
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  // Header with logo and university name
   Widget buildHeader() {
-    // Get the screen width
     double screenWidth = MediaQuery.of(context).size.width;
-
-    // Set font size and padding based on the screen width
-    double fontSize =
-        screenWidth < 600 ? 14.0 : 18.0; // Smaller font for narrow screens
-    double subtitleFontSize =
-        screenWidth < 600 ? 10.0 : 12.0; // Adjust subtitle font size
-    double padding =
-        screenWidth < 600 ? 12.0 : 16.0; // Smaller padding for narrow screens
-    double avatarSize = screenWidth < 600
-        ? 25.0
-        : 30.0; // Adjust avatar size for narrow screens
-    double spacing =
-        screenWidth < 600 ? 12.0 : 16.0; // Adjust spacing for narrow screens
+    double fontSize = screenWidth < 600 ? 14.0 : 18.0;
+    double subtitleFontSize = screenWidth < 600 ? 10.0 : 12.0;
+    double padding = screenWidth < 600 ? 12.0 : 16.0;
+    double avatarSize = screenWidth < 600 ? 25.0 : 30.0;
+    double spacing = screenWidth < 600 ? 12.0 : 16.0;
 
     return Container(
-      color: const Color(0xFF2C9B44),
+      color: const Color(0xFFF2F8FC),
       padding: EdgeInsets.all(padding),
       child: Row(
         children: [
           CircleAvatar(
-            radius: avatarSize, // Responsive size for logo
+            radius: avatarSize,
             backgroundColor: const Color(0xFFF2F8FC),
             child: const Icon(Icons.school, size: 30, color: Colors.green),
           ),
-          SizedBox(width: spacing), // Responsive spacing
-
-          // Expanded column for title and subtitles
+          SizedBox(width: spacing),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,35 +245,549 @@ class _LoginPageState extends State<LoginPage> {
                   style: TextStyle(
                     fontSize: fontSize,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Colors.black,
                   ),
-                  maxLines: 1, // Restrict to one line
-                  overflow:
-                      TextOverflow.ellipsis, // Add ellipsis if text overflows
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(
-                    height: 4.0), // Spacing between title and subtitles
-
-                // Subtitle lines
+                const SizedBox(height: 4.0),
                 Text(
                   'Brgy. San Jose, San Pablo City',
                   style: TextStyle(
                     fontSize: subtitleFontSize,
-                    color: const Color(0xFFF2F8FC),
+                    color: Colors.black,
                   ),
                 ),
                 Text(
                   'Tel No: (049) 536-7380',
                   style: TextStyle(
                     fontSize: subtitleFontSize,
-                    color: const Color(0xFFF2F8FC),
+                    color: Colors.black,
                   ),
                 ),
                 Text(
                   'Email Address: plspofficial@plsp.edu.ph',
                   style: TextStyle(
                     fontSize: subtitleFontSize,
-                    color: const Color(0xFFF2F8FC),
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SignUpPage extends StatefulWidget {
+  const SignUpPage({super.key});
+
+  @override
+  State<SignUpPage> createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends State<SignUpPage> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _studentIdController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _obscurePassword = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF2F8FC),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                buildHeader(),
+                Padding(
+                  padding: const EdgeInsets.all(36.0),
+                  child: Container(
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Center(
+                            child: Text(
+                              'Sign Up',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20.0),
+                          const Text(
+                            'Student ID',
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 4.0),
+                          TextFormField(
+                            controller: _studentIdController,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter your Student ID',
+                              border: OutlineInputBorder(),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your Student ID';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16.0),
+                          const Text(
+                            'Last Name',
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 4.0),
+                          TextFormField(
+                            controller: _lastNameController,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter your Last Name',
+                              border: OutlineInputBorder(),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your Last Name';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16.0),
+                          const Text(
+                            'Email',
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 4.0),
+                          TextFormField(
+                            controller: _emailController,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter your email address',
+                              border: OutlineInputBorder(),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your email';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16.0),
+                          const Text(
+                            'Password',
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 4.0),
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: _obscurePassword,
+                            decoration: InputDecoration(
+                              hintText: 'Enter your password',
+                              border: const OutlineInputBorder(),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePassword
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _obscurePassword = !_obscurePassword;
+                                  });
+                                },
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your password';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20.0),
+                          Center(
+                            child: SizedBox(
+                              width: 150,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF2C9B44),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 12.0),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  if (_formKey.currentState!.validate()) {
+                                    // Handle sign up logic here
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const StudentDashboard(),
+                                      ),
+                                    );
+                                  }
+                                },
+                                child: const Text(
+                                  'Submit',
+                                  style: TextStyle(
+                                    fontSize: 16.0,
+                                    color: Color(0xFFF2F8FC),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20.0),
+                          Center(
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.pop(context); // Go back to Login page
+                              },
+                              child: const Text(
+                                'Already have an account? Login',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildHeader() {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double fontSize = screenWidth < 600 ? 14.0 : 18.0;
+    double subtitleFontSize = screenWidth < 600 ? 10.0 : 12.0;
+    double padding = screenWidth < 600 ? 12.0 : 16.0;
+    double avatarSize = screenWidth < 600 ? 25.0 : 30.0;
+    double spacing = screenWidth < 600 ? 12.0 : 16.0;
+
+    return Container(
+      color: const Color(0xFFF2F8FC),
+      padding: EdgeInsets.all(padding),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: avatarSize,
+            backgroundColor: const Color(0xFFF2F8FC),
+            child: const Icon(Icons.school, size: 30, color: Colors.green),
+          ),
+          SizedBox(width: spacing),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Pamantasan ng Lungsod ng San Pablo',
+                  style: TextStyle(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4.0),
+                Text(
+                  'Brgy. San Jose, San Pablo City',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  'Tel No: (049) 536-7380',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  'Email Address: plspofficial@plsp.edu.ph',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ForgotPasswordPage extends StatefulWidget {
+  const ForgotPasswordPage({super.key});
+
+  @override
+  State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
+}
+
+class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
+  final TextEditingController _emailController = TextEditingController();
+  bool _isButtonDisabled = false;
+  String _buttonText = "Send OTP";
+  String _timerText = ""; // Timer text to indicate remaining time
+  int _remainingTime = 10; // 10 seconds countdown
+
+  void _sendOtp() {
+    // Disable button and start timer for 10 seconds
+    setState(() {
+      _isButtonDisabled = true;
+      _buttonText = "Resend";
+      _timerText = "Resend in $_remainingTime s";
+    });
+
+    // Start a timer that counts down every second
+    Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_remainingTime > 1) {
+        setState(() {
+          _remainingTime--;
+          _timerText = "Resend in $_remainingTime s";
+        });
+      } else {
+        timer.cancel(); // Stop the timer
+        setState(() {
+          _isButtonDisabled = false;
+          _buttonText = "Send OTP";
+          _timerText = ""; // Clear the timer text
+          _remainingTime = 10; // Reset the remaining time
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF2F8FC),
+      body: SafeArea(
+        child: Column(
+          children: [
+            buildHeader(), // Header at the very top
+            Expanded(
+              child: SingleChildScrollView(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(36.0),
+                    child: Container(
+                      padding: const EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 20.0),
+                          const Center(
+                            child: Text(
+                              'Forgot Password',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20.0),
+                          const Text(
+                            'Email Address',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4.0),
+                          TextFormField(
+                            controller: _emailController,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter your email address',
+                              border: OutlineInputBorder(),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your email';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20.0),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              ElevatedButton(
+                                onPressed: _isButtonDisabled ? null : _sendOtp,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF2C9B44),
+                                ),
+                                child: Text(
+                                  _buttonText,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              // Displaying the timer text
+                              if (_timerText.isNotEmpty)
+                                Text(
+                                  _timerText,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 20.0),
+                          Center(
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF2C9B44),
+                                ),
+                                onPressed: () {
+                                  // Handle the submit action here
+                                },
+                                child: const Text(
+                                  'Submit',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                              height: 20.0), // Spacing for the back link
+                          Center(
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.pop(context); // Go back to login page
+                              },
+                              child: const Text(
+                                'Back to Login',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildHeader() {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double fontSize = screenWidth < 600 ? 14.0 : 18.0;
+    double subtitleFontSize = screenWidth < 600 ? 10.0 : 12.0;
+    double padding = screenWidth < 600 ? 12.0 : 16.0;
+    double avatarSize = screenWidth < 600 ? 25.0 : 30.0;
+    double spacing = screenWidth < 600 ? 12.0 : 16.0;
+
+    return Container(
+      color: const Color(0xFFF2F8FC),
+      padding: EdgeInsets.all(padding),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: avatarSize,
+            backgroundColor: const Color(0xFFF2F8FC),
+            child: const Icon(Icons.school, size: 30, color: Colors.green),
+          ),
+          SizedBox(width: spacing),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Pamantasan ng Lungsod ng San Pablo',
+                  style: TextStyle(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4.0),
+                Text(
+                  'Brgy. San Jose, San Pablo City',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  'Tel No: (049) 536-7380',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  'Email Address: plspofficial@plsp.edu.ph',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                    color: Colors.black,
                   ),
                 ),
               ],
@@ -259,7 +883,12 @@ class StudentDashboardState extends State<StudentDashboard> {
                   'Digital Marketing Strategies',
                 ],
                 onTilePressed: (title) {
-                  // Add your action for when an archived class tile is pressed
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CourseDetails(title: title),
+                    ),
+                  );
                 },
               ),
             ],
