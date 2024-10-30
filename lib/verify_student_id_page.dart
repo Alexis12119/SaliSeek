@@ -1,4 +1,3 @@
-import 'package:SaliSeek/main.dart';
 import 'package:SaliSeek/sign_up_page.dart';
 import 'package:flutter/material.dart';
 

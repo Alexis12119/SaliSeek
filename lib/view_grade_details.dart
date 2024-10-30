@@ -1,5 +1,4 @@
 import 'package:SaliSeek/course_tile.dart';
-import 'package:SaliSeek/main.dart';
 import 'package:flutter/material.dart';
 
 class ViewGradeDetails extends StatelessWidget {

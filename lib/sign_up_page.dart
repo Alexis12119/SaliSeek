@@ -1,4 +1,3 @@
-import 'package:SaliSeek/main.dart';
 import 'package:SaliSeek/student_dashboard.dart';
 import 'package:flutter/material.dart';
 
