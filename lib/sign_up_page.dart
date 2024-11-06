@@ -1,4 +1,5 @@
-import 'package:SaliSeek/student_dashboard.dart';
+import 'package:SaliSeek/login_page.dart';
+import 'package:SaliSeek/forgot_password_page.dart';
 import 'package:flutter/material.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -145,12 +146,11 @@ class _SignUpPageState extends State<SignUpPage> {
                                 ),
                                 onPressed: () {
                                   if (_formKey.currentState!.validate()) {
-                                    // Handle sign up logic here
                                     Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            const StudentDashboard(),
+                                            const LoginPage(),
                                       ),
                                     );
                                   }
@@ -169,7 +169,12 @@ class _SignUpPageState extends State<SignUpPage> {
                           Center(
                             child: TextButton(
                               onPressed: () {
-                                Navigator.pop(context); // Go back to Login page
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const LoginPage()),
+                                );
                               },
                               child: const Text(
                                 'Already have an account? Login',

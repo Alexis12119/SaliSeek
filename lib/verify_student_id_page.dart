@@ -1,3 +1,4 @@
+import 'package:SaliSeek/login_page.dart';
 import 'package:SaliSeek/sign_up_page.dart';
 import 'package:flutter/material.dart';
 
@@ -111,7 +112,12 @@ class _VerifyStudentIdPageState extends State<VerifyStudentIdPage> {
                           Center(
                             child: TextButton(
                               onPressed: () {
-                                Navigator.pop(context); // Go back to Login page
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const LoginPage()),
+                                );
                               },
                               child: const Text(
                                 'Back to Login',
