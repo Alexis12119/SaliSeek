@@ -105,4 +105,3 @@ class CourseTile extends StatelessWidget {
     );
   }
 }
-

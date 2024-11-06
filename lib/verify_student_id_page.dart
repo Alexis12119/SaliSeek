@@ -198,4 +198,3 @@ class _VerifyStudentIdPageState extends State<VerifyStudentIdPage> {
     );
   }
 }
-

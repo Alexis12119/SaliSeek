@@ -42,4 +42,3 @@ class ClassTile extends StatelessWidget {
     );
   }
 }
-

@@ -335,4 +335,3 @@ class CourseDetails extends StatelessWidget {
     );
   }
 }
-

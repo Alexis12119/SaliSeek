@@ -11,4 +11,3 @@ class SubmittedFile {
     required this.fileType,
   });
 }
-

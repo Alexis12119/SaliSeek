@@ -41,4 +41,3 @@ class SemesterTile extends StatelessWidget {
     );
   }
 }
-
