@@ -1,5 +1,4 @@
 import 'package:SaliSeek/login_page.dart';
-import 'package:SaliSeek/forgot_password_page.dart';
 import 'package:flutter/material.dart';
 
 class SignUpPage extends StatefulWidget {
