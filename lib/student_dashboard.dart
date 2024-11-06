@@ -136,8 +136,8 @@ class StudentDashboardState extends State<StudentDashboard> {
               CircleAvatar(
                 radius: logoIconSize, // Responsive size for logo
                 backgroundColor: const Color(0xFFF2F8FC),
-                child:
-                    Icon(Icons.school, size: logoIconSize, color: Colors.green),
+                backgroundImage:
+                  const AssetImage('assets/images/plsp.jpg'), 
               ),
               SizedBox(width: spacing), // Responsive spacing
 

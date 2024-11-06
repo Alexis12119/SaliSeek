@@ -86,11 +86,8 @@ class ViewGradeDetails extends StatelessWidget {
           CircleAvatar(
             radius: logoIconSize, // Responsive avatar size
             backgroundColor: const Color(0xFFF2F8FC),
-            child: Icon(
-              Icons.school,
-              size: logoIconSize,
-              color: Colors.green, // Icon color
-            ),
+            backgroundImage:
+                const AssetImage('assets/images/plsp.jpg'), 
           ),
           SizedBox(width: screenWidth < 600 ? 12.0 : 16.0), // Spacing
 

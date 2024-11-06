@@ -284,7 +284,8 @@ class CourseDetails extends StatelessWidget {
           CircleAvatar(
             radius: logoSize,
             backgroundColor: const Color(0xFFF2F8FC),
-            child: Icon(Icons.school, size: logoIconSize, color: Colors.green),
+            backgroundImage:
+                const AssetImage('assets/images/plsp.jpg'), 
           ),
 
           const SizedBox(width: 8.0),

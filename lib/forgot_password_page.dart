@@ -11,16 +11,14 @@ class ForgotPasswordPage extends StatefulWidget {
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final TextEditingController _emailController = TextEditingController();
   bool _isButtonDisabled = false;
-  String _buttonText = "Send OTP";
-  String _timerText = ""; // Timer text to indicate remaining time
-  int _remainingTime = 10; // 10 seconds countdown
+  String _buttonText = "Send Link";
+  int _remainingTime = 30; // 30 seconds countdown
 
-  void _sendOtp() {
-    // Disable button and start timer for 10 seconds
+  void _sendLink() {
+    // Disable button and start timer for 30 seconds
     setState(() {
       _isButtonDisabled = true;
-      _buttonText = "Resend";
-      _timerText = "Resend in $_remainingTime s";
+      _buttonText = "Resend in $_remainingTime s";
     });
 
     // Start a timer that counts down every second
@@ -28,15 +26,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       if (_remainingTime > 1) {
         setState(() {
           _remainingTime--;
-          _timerText = "Resend in $_remainingTime s";
+          _buttonText = "Resend in $_remainingTime s";
         });
       } else {
         timer.cancel(); // Stop the timer
         setState(() {
           _isButtonDisabled = false;
-          _buttonText = "Send OTP";
-          _timerText = ""; // Clear the timer text
-          _remainingTime = 10; // Reset the remaining time
+          _buttonText = "Send Link";
+          _remainingTime = 30; // Reset the remaining time
         });
       }
     });
@@ -104,11 +101,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             },
                           ),
                           const SizedBox(height: 20.0),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              ElevatedButton(
-                                onPressed: _isButtonDisabled ? null : _sendOtp,
+                          Center(
+                            child: SizedBox(
+                              width: 150.0, // Set the width of the button here
+                              child: ElevatedButton(
+                                onPressed: _isButtonDisabled ? null : _sendLink,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF2C9B44),
                                 ),
@@ -116,42 +113,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                   _buttonText,
                                   style: const TextStyle(
                                     color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                              // Displaying the timer text
-                              if (_timerText.isNotEmpty)
-                                Text(
-                                  _timerText,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 20.0),
-                          Center(
-                            child: SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF2C9B44),
-                                ),
-                                onPressed: () {
-                                  // Handle the submit action here
-                                },
-                                child: const Text(
-                                  'Submit',
-                                  style: TextStyle(
-                                    color: Colors.white,
+                                    fontSize: 16,
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                          const SizedBox(
-                              height: 20.0), // Spacing for the back link
+                          const SizedBox(height: 20.0),
                           Center(
                             child: TextButton(
                               onPressed: () {
@@ -195,7 +163,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           CircleAvatar(
             radius: avatarSize,
             backgroundColor: const Color(0xFFF2F8FC),
-            child: const Icon(Icons.school, size: 30, color: Colors.green),
+            backgroundImage:
+                const AssetImage('assets/images/plsp.jpg'), 
           ),
           SizedBox(width: spacing),
           Expanded(

@@ -157,7 +157,8 @@ class _VerifyStudentIdPageState extends State<VerifyStudentIdPage> {
           CircleAvatar(
             radius: avatarSize,
             backgroundColor: const Color(0xFFF2F8FC),
-            child: const Icon(Icons.school, size: 30, color: Colors.green),
+            backgroundImage:
+                const AssetImage('assets/images/plsp.jpg'), 
           ),
           SizedBox(width: spacing),
           Expanded(
