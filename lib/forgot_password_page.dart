@@ -256,6 +256,7 @@ class ResetPasswordPageState extends State<ResetPasswordPage> {
   final TextEditingController _tokenController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isButtonDisabled = false;
+  bool _isPasswordVisible = false;
 
   Future<void> _resetPassword() async {
     final newPassword = _passwordController.text.trim();
@@ -277,14 +278,11 @@ class ResetPasswordPageState extends State<ResetPasswordPage> {
     final supabase = Supabase.instance.client;
 
     try {
-      // Step 1: Use the email entered on the ForgotPasswordPage
       final email = widget.email; // Pass the email from the ForgotPasswordPage
 
-      // Step 2: Update the user's password in the 'students' table (or your user table)
       await supabase
-          .from('students') // Replace with the table that holds user data
-          .update({'password': newPassword}) // New password
-          .eq('email', email); // Use the email to find the user
+          .from('students')
+          .update({'password': newPassword}).eq('email', email);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -292,8 +290,10 @@ class ResetPasswordPageState extends State<ResetPasswordPage> {
           backgroundColor: Colors.green,
         ),
       );
-      // Navigate back to login screen after success
-      MaterialPageRoute(builder: (context) => const LoginPage());
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+      );
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -315,7 +315,7 @@ class ResetPasswordPageState extends State<ResetPasswordPage> {
       body: SafeArea(
         child: Column(
           children: [
-            buildHeader(), // Reuse the header from the forgot password page
+            buildHeader(),
             Expanded(
               child: SingleChildScrollView(
                 child: Center(
@@ -381,10 +381,24 @@ class ResetPasswordPageState extends State<ResetPasswordPage> {
                           const SizedBox(height: 4.0),
                           TextFormField(
                             controller: _passwordController,
-                            obscureText: true,
-                            decoration: const InputDecoration(
+                            obscureText:
+                                !_isPasswordVisible, // Toggle visibility
+                            decoration: InputDecoration(
                               hintText: 'Enter your new password',
-                              border: OutlineInputBorder(),
+                              border: const OutlineInputBorder(),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _isPasswordVisible
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                  color: Colors.grey,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _isPasswordVisible = !_isPasswordVisible;
+                                  });
+                                },
+                              ),
                             ),
                           ),
                           const SizedBox(height: 20.0),
