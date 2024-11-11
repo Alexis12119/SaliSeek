@@ -9,9 +9,6 @@ class CourseDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<String> modules =
-        List.generate(10, (index) => 'Module ${index + 1}');
-
     final List<Map<String, String>> tasksAndActivities = List.generate(
       10,
       (index) => {
@@ -20,11 +17,16 @@ class CourseDetails extends StatelessWidget {
         'dueDate': 'Oct. 20'
       },
     );
+    final List<Map<String, String>> modules = [
+      {'title': 'Module 1', 'url': 'https://google.com'},
+      {'title': 'Module 2', 'url': 'https://google.com'},
+      {'title': 'Module 3', 'url': 'https://google.com'},
+      // Add more modules with their URLs...
+    ];
 
     Widget buildSectionWithArrows({
       required ScrollController scrollController,
-      required List<String> items,
-      required Function(String)? onTilePressed,
+      required List<Map<String, String>> items,
     }) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,41 +35,19 @@ class CourseDetails extends StatelessWidget {
             height: 100,
             child: Row(
               children: [
-                // IconButton(
-                //   icon: const Icon(Icons.arrow_back_ios),
-                //   onPressed: () {
-                //     scrollController.animateTo(
-                //       scrollController.offset - 150,
-                //       duration: const Duration(milliseconds: 300),
-                //       curve: Curves.ease,
-                //     );
-                //   },
-                // ),
                 Expanded(
                   child: ListView.builder(
                     controller: scrollController,
                     scrollDirection: Axis.horizontal,
                     itemCount: items.length,
                     itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: onTilePressed != null
-                            ? () => onTilePressed(items[index])
-                            : null,
-                        child: SemesterTile(items[index]),
+                      return SemesterTile(
+                        items[index]['title']!,
+                        url: items[index]['url'],
                       );
                     },
                   ),
                 ),
-                // IconButton(
-                //   icon: const Icon(Icons.arrow_forward_ios),
-                //   onPressed: () {
-                //     scrollController.animateTo(
-                //       scrollController.offset + 150,
-                //       duration: const Duration(milliseconds: 300),
-                //       curve: Curves.ease,
-                //     );
-                //   },
-                // ),
               ],
             ),
           ),
@@ -243,7 +223,6 @@ class CourseDetails extends StatelessWidget {
             buildSectionWithArrows(
               scrollController: moduleScrollController,
               items: modules,
-              onTilePressed: (title) {},
             ),
             Expanded(child: buildTasksAndActivities()),
           ],
@@ -261,7 +240,6 @@ class CourseDetails extends StatelessWidget {
     double iconSize = screenWidth < 600 ? 15.0 : 20.0;
     double iconPadding = screenWidth < 600 ? 0.0 : 8.0;
     double logoSize = screenWidth < 600 ? 20.0 : 30.0;
-    double logoIconSize = screenWidth < 600 ? 20.0 : 30.0;
 
     return Container(
       color: const Color(0xFF2C9B44),
@@ -284,8 +262,7 @@ class CourseDetails extends StatelessWidget {
           CircleAvatar(
             radius: logoSize,
             backgroundColor: const Color(0xFFF2F8FC),
-            backgroundImage:
-                const AssetImage('assets/images/plsp.jpg'), 
+            backgroundImage: const AssetImage('assets/images/plsp.jpg'),
           ),
 
           const SizedBox(width: 8.0),
