@@ -2,6 +2,7 @@ import 'package:SaliSeek/forgot_password_page.dart';
 import 'package:SaliSeek/student_dashboard.dart';
 import 'package:SaliSeek/verify_student_id_page.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,6 +16,78 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _studentIdController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _isLoading = false;
+
+  Future<void> _handleLogin() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final supabase = Supabase.instance.client;
+      try {
+        // Fetch student details from the students table using the provided student ID
+        final response = await supabase
+            .from('students')
+            .select()
+            .eq('student_id',
+                _studentIdController.text.trim()) // Student ID lookup
+            .single();
+
+        // Check if student exists and the password matches
+        if (response['password'] == _passwordController.text) {
+          // If password matches, login is successful
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const StudentDashboard(),
+            ),
+          );
+        } else {
+          // Show error if student ID or password doesn't match
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Invalid student ID or password'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      } on PostgrestException catch (error) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Database error: ${error.message}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (error) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('An unexpected error occurred. Please try again.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _studentIdController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,11 +96,10 @@ class _LoginPageState extends State<LoginPage> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Center(
-            // Center the column in the middle of the screen
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center, // Center the column
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                buildHeader(), // Header with logo and title
+                buildHeader(),
                 Padding(
                   padding: const EdgeInsets.all(36.0),
                   child: Container(
@@ -50,17 +122,15 @@ class _LoginPageState extends State<LoginPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Center(
-                            // Center the Login title
                             child: Text(
-                              'Login', // Title text
+                              'Login',
                               style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight:
-                                      FontWeight.bold), // Style for the title
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                          const SizedBox(
-                              height: 20.0), // Spacing between title and form
+                          const SizedBox(height: 20.0),
                           const Text(
                             'Student ID',
                             style: TextStyle(
@@ -116,74 +186,76 @@ class _LoginPageState extends State<LoginPage> {
                           const SizedBox(height: 20.0),
                           Center(
                             child: SizedBox(
-                              width: 150, // Set a fixed width for the button
+                              width: 150,
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF2C9B44),
                                   padding: const EdgeInsets.symmetric(
-                                      vertical: 12.0), // Smaller height
+                                      vertical: 12.0),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        8.0), // Rounded corners
+                                    borderRadius: BorderRadius.circular(8.0),
                                   ),
                                 ),
-                                onPressed: () {
-                                  if (_formKey.currentState!.validate()) {
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const StudentDashboard(),
+                                onPressed: _isLoading ? null : _handleLogin,
+                                child: _isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Text(
+                                        'Submit',
+                                        style: TextStyle(
+                                          fontSize: 16.0,
+                                          color: Color(0xFFF2F8FC),
+                                        ),
                                       ),
-                                    );
-                                  }
-                                },
-                                child: const Text(
-                                  'Submit',
-                                  style: TextStyle(
-                                    fontSize: 16.0,
-                                    color: Color(0xFFF2F8FC),
-                                  ),
-                                ),
                               ),
                             ),
                           ),
-                          const SizedBox(height: 20.0), // Spacing for the links
+                          const SizedBox(height: 20.0),
                           Center(
                             child: Column(
                               children: [
                                 TextButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const VerifyStudentIdPage()),
-                                    );
-                                  },
+                                  onPressed: _isLoading
+                                      ? null
+                                      : () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const VerifyStudentIdPage(),
+                                            ),
+                                          );
+                                        },
                                   child: const Text(
                                     "Don't have an account? Sign Up",
                                     style: TextStyle(
-                                      color: Colors
-                                          .black, // Change link color to black
+                                      color: Colors.black,
                                       fontSize: 14,
                                     ),
                                   ),
                                 ),
                                 TextButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const ForgotPasswordPage()),
-                                    );
-                                  },
+                                  onPressed: _isLoading
+                                      ? null
+                                      : () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const ForgotPasswordPage(),
+                                            ),
+                                          );
+                                        },
                                   child: const Text(
                                     'Forgot Password?',
                                     style: TextStyle(
-                                      color: Colors
-                                          .black, // Change link color to black
+                                      color: Colors.black,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -220,8 +292,7 @@ class _LoginPageState extends State<LoginPage> {
           CircleAvatar(
             radius: avatarSize,
             backgroundColor: const Color(0xFFF2F8FC),
-            backgroundImage:
-                const AssetImage('assets/images/plsp.jpg'), 
+            backgroundImage: const AssetImage('assets/images/plsp.jpg'),
           ),
           SizedBox(width: spacing),
           Expanded(

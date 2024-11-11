@@ -1,5 +1,6 @@
 import 'package:SaliSeek/login_page.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -14,6 +15,90 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _isLoading = false;
+
+  // Get Supabase client instance
+  final supabase = Supabase.instance.client;
+
+  // Function to handle signup
+  Future<void> _handleSignUp() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        // 1. Create auth user with Supabase
+        final AuthResponse response = await supabase.auth.signUp(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+
+        if (response.user != null) {
+          // 2. Insert additional user data into students table
+          await supabase.from('students').insert({
+            'email': _emailController.text.trim(),
+            'last_name': _lastNameController.text.trim(),
+            'password': _passwordController.text,
+            // Note: We don't store the password in the students table as it's already
+            // securely handled by Supabase Auth
+          });
+
+          if (mounted) {
+            // Show success message and navigate to login
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Account created successfully! Please login.'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginPage()),
+            );
+          }
+        }
+      } on AuthException catch (error) {
+        // Handle Supabase Auth specific errors
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(error.message),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } on PostgrestException catch (error) {
+        // Handle database errors
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Database error: ${error.message}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } catch (error) {
+        // Handle other errors
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An unexpected error occurred: $error'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,11 +142,9 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                           ),
                           const SizedBox(height: 20.0),
-                          const SizedBox(height: 16.0),
                           const Text(
                             'Last Name',
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4.0),
                           TextFormField(
@@ -80,8 +163,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           const SizedBox(height: 16.0),
                           const Text(
                             'Email',
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4.0),
                           TextFormField(
@@ -94,14 +176,17 @@ class _SignUpPageState extends State<SignUpPage> {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter your email';
                               }
+                              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                                  .hasMatch(value)) {
+                                return 'Please enter a valid email';
+                              }
                               return null;
                             },
                           ),
                           const SizedBox(height: 16.0),
                           const Text(
                             'Password',
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4.0),
                           TextFormField(
@@ -127,6 +212,9 @@ class _SignUpPageState extends State<SignUpPage> {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter your password';
                               }
+                              if (value.length < 6) {
+                                return 'Password must be at least 6 characters';
+                              }
                               return null;
                             },
                           ),
@@ -137,44 +225,43 @@ class _SignUpPageState extends State<SignUpPage> {
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF2C9B44),
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 12.0),
+                                  padding: const EdgeInsets.symmetric(vertical: 12.0),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                 ),
-                                onPressed: () {
-                                  if (_formKey.currentState!.validate()) {
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const LoginPage(),
+                                onPressed: _isLoading ? null : _handleSignUp,
+                                child: _isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Text(
+                                        'Submit',
+                                        style: TextStyle(
+                                          fontSize: 16.0,
+                                          color: Color(0xFFF2F8FC),
+                                        ),
                                       ),
-                                    );
-                                  }
-                                },
-                                child: const Text(
-                                  'Submit',
-                                  style: TextStyle(
-                                    fontSize: 16.0,
-                                    color: Color(0xFFF2F8FC),
-                                  ),
-                                ),
                               ),
                             ),
                           ),
                           const SizedBox(height: 20.0),
                           Center(
                             child: TextButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const LoginPage()),
-                                );
-                              },
+                              onPressed: _isLoading
+                                  ? null
+                                  : () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => const LoginPage()),
+                                      );
+                                    },
                               child: const Text(
                                 'Already have an account? Login',
                                 style: TextStyle(
@@ -196,6 +283,7 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
     );
   }
+
 
   Widget buildHeader() {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -260,4 +348,5 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
     );
   }
+
 }
