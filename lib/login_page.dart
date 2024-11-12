@@ -37,12 +37,14 @@ class _LoginPageState extends State<LoginPage> {
         // Check if student exists and the password matches
         if (response['password'] == _passwordController.text) {
           // If password matches, login is successful
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const StudentDashboard(),
-            ),
-          );
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const StudentDashboard(),
+              ),
+            );
+          }
         } else {
           // Show error if student ID or password doesn't match
           if (mounted) {

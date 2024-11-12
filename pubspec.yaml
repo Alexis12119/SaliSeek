@@ -34,6 +34,7 @@ dependencies:
   url_launcher: ^6.1.11
   url_launcher_web: ^2.0.19  # Add this for web support
   supabase_flutter: ^2.8.0
+  intl: ^0.18.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

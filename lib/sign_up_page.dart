@@ -60,28 +60,34 @@ class _SignUpPageState extends State<SignUpPage> {
         }
       } on AuthException catch (error) {
         // Handle Supabase Auth specific errors
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error.message),
-            backgroundColor: Colors.red,
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(error.message),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       } on PostgrestException catch (error) {
         // Handle database errors
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Database error: ${error.message}'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Database error: ${error.message}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       } catch (error) {
         // Handle other errors
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('An unexpected error occurred: $error'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('An unexpected error occurred: $error'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       } finally {
         if (mounted) {
           setState(() {
@@ -144,7 +150,8 @@ class _SignUpPageState extends State<SignUpPage> {
                           const SizedBox(height: 20.0),
                           const Text(
                             'Last Name',
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4.0),
                           TextFormField(
@@ -163,7 +170,8 @@ class _SignUpPageState extends State<SignUpPage> {
                           const SizedBox(height: 16.0),
                           const Text(
                             'Email',
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4.0),
                           TextFormField(
@@ -186,7 +194,8 @@ class _SignUpPageState extends State<SignUpPage> {
                           const SizedBox(height: 16.0),
                           const Text(
                             'Password',
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4.0),
                           TextFormField(
@@ -225,7 +234,8 @@ class _SignUpPageState extends State<SignUpPage> {
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF2C9B44),
-                                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 12.0),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
@@ -259,7 +269,8 @@ class _SignUpPageState extends State<SignUpPage> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) => const LoginPage()),
+                                            builder: (context) =>
+                                                const LoginPage()),
                                       );
                                     },
                               child: const Text(
@@ -284,7 +295,6 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-
   Widget buildHeader() {
     double screenWidth = MediaQuery.of(context).size.width;
     double fontSize = screenWidth < 600 ? 10.0 : 18.0;
@@ -301,8 +311,7 @@ class _SignUpPageState extends State<SignUpPage> {
           CircleAvatar(
             radius: avatarSize,
             backgroundColor: const Color(0xFFF2F8FC),
-            backgroundImage:
-                const AssetImage('assets/images/plsp.jpg'), 
+            backgroundImage: const AssetImage('assets/images/plsp.jpg'),
           ),
           SizedBox(width: spacing),
           Expanded(
@@ -348,5 +357,4 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
     );
   }
-
 }

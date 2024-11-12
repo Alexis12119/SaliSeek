@@ -42,13 +42,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
     try {
       await supabase.auth.resetPasswordForEmail(_emailController.text.trim());
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) =>
-                ResetPasswordPage(email: _emailController.text.trim())),
-      );
-
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  ResetPasswordPage(email: _emailController.text.trim())),
+        );
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -284,23 +285,29 @@ class ResetPasswordPageState extends State<ResetPasswordPage> {
           .from('students')
           .update({'password': newPassword}).eq('email', email);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Your password has been successfully updated.'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Your password has been successfully updated.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      }
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('An error occurred: $error'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An error occurred: $error'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
       setState(() {
         _isButtonDisabled = false;

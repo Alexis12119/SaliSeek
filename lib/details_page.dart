@@ -1,6 +1,7 @@
 import 'package:SaliSeek/submitted_file.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DetailsPage extends StatefulWidget {
   const DetailsPage({super.key});
@@ -12,6 +13,30 @@ class DetailsPage extends StatefulWidget {
 class _DetailsPageState extends State<DetailsPage> {
   List<SubmittedFile> submittedFiles = [];
   final bool _isUploading = false;
+  final supabase = Supabase.instance.client;
+
+  String? dueDate;
+  String? description;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchTaskData();
+  }
+
+  // Fetch task data from Supabase
+  Future<void> fetchTaskData() async {
+    final response = await supabase
+        .from('task')
+        .select('due_date, description')
+        .eq('id', 1)
+        .single();
+
+    setState(() {
+      dueDate = response['due_date'];
+      description = response['description'];
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,9 +68,9 @@ class _DetailsPageState extends State<DetailsPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Due Date: October 30, 2024',
-                        style: TextStyle(
+                      Text(
+                        'Due Date: ${dueDate ?? "Loading..."}',
+                        style: const TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 16.0),
                       ),
                       const SizedBox(height: 16.0),
@@ -77,9 +102,9 @@ class _DetailsPageState extends State<DetailsPage> {
                             fontSize: 16.0, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8.0),
-                      const Text(
-                        'Write a report on the impacts of technology on education.',
-                        style: TextStyle(fontSize: 14.0),
+                      Text(
+                        description ?? 'Loading...',
+                        style: const TextStyle(fontSize: 14.0),
                       ),
                       const SizedBox(height: 24.0),
                       // File Upload Section
@@ -331,7 +356,6 @@ class _DetailsPageState extends State<DetailsPage> {
     double iconSize = screenWidth < 600 ? 15.0 : 20.0;
     double iconPadding = screenWidth < 600 ? 0.0 : 8.0;
     double logoSize = screenWidth < 600 ? 20.0 : 30.0;
-    double logoIconSize = screenWidth < 600 ? 20.0 : 30.0;
 
     return Container(
       color: const Color(0xFF2C9B44),
@@ -354,8 +378,7 @@ class _DetailsPageState extends State<DetailsPage> {
           CircleAvatar(
             radius: logoSize,
             backgroundColor: const Color(0xFFF2F8FC),
-            backgroundImage:
-                const AssetImage('assets/images/plsp.jpg'), 
+            backgroundImage: const AssetImage('assets/images/plsp.jpg'),
           ),
 
           const SizedBox(width: 8.0),
