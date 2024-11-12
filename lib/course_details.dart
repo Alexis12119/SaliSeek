@@ -14,7 +14,7 @@ class CourseDetails extends StatelessWidget {
   Future<List<Map<String, dynamic>>> fetchTasks() async {
     try {
       final response = await supabase
-          .from('task')
+          .from('tasks')
           .select('*')
           .order('due_date', ascending: true);
 

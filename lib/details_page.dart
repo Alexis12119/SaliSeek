@@ -27,7 +27,7 @@ class _DetailsPageState extends State<DetailsPage> {
   // Fetch task data from Supabase
   Future<void> fetchTaskData() async {
     final response = await supabase
-        .from('task')
+        .from('tasks')
         .select('due_date, description')
         .eq('id', 1)
         .single();
