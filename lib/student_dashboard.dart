@@ -11,6 +11,7 @@ class StudentDashboard extends StatefulWidget {
   @override
   StudentDashboardState createState() => StudentDashboardState();
 }
+
 class StudentDashboardState extends State<StudentDashboard> {
   final ScrollController _gradeScrollController = ScrollController();
   final ScrollController _courseScrollController = ScrollController();
@@ -55,7 +56,7 @@ class StudentDashboardState extends State<StudentDashboard> {
                     SemesterTile(title), // Use SemesterTile here
               ),
 
-// Courses Section
+              // Courses Section
               buildSectionWithArrows(
                 title: 'Courses:',
                 scrollController: _courseScrollController,
@@ -136,8 +137,7 @@ class StudentDashboardState extends State<StudentDashboard> {
               CircleAvatar(
                 radius: logoIconSize, // Responsive size for logo
                 backgroundColor: const Color(0xFFF2F8FC),
-                backgroundImage:
-                  const AssetImage('assets/images/plsp.jpg'), 
+                backgroundImage: const AssetImage('assets/images/plsp.jpg'),
               ),
               SizedBox(width: spacing), // Responsive spacing
 
