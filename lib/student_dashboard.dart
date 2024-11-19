@@ -30,7 +30,7 @@ class StudentDashboardState extends State<StudentDashboard> {
               // Profile Section
               buildProfileSection(),
 
-// View Grades Section
+              // View Grades Section
               buildSectionWithArrows(
                 title: 'View Grades:',
                 scrollController: _gradeScrollController,
@@ -81,7 +81,7 @@ class StudentDashboardState extends State<StudentDashboard> {
                 tileType: (title) => ClassTile(title), // Use ClassTile here
               ),
 
-// Archived Classes Section
+              // Archived Classes Section
               buildSectionWithArrows(
                 title: 'Archived Classes:',
                 scrollController: _archivedScrollController,

@@ -30,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
         final response = await supabase
             .from('students')
             .select()
-            .eq('student_id',
+            .eq('id',
                 _studentIdController.text.trim()) // Student ID lookup
             .single();
 
