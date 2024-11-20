@@ -1,5 +1,5 @@
 import 'package:SaliSeek/details_page.dart';
-import 'package:SaliSeek/semester_tile.dart';
+import 'package:SaliSeek/module_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
@@ -49,7 +49,7 @@ class CourseDetails extends StatelessWidget {
                     scrollDirection: Axis.horizontal,
                     itemCount: items.length,
                     itemBuilder: (context, index) {
-                      return SemesterTile(
+                      return ModuleTile(
                         items[index]['title']!,
                         url: items[index]['url'],
                       );
