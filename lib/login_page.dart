@@ -30,8 +30,7 @@ class _LoginPageState extends State<LoginPage> {
         final response = await supabase
             .from('students')
             .select()
-            .eq('id',
-                _studentIdController.text.trim()) // Student ID lookup
+            .eq('id', _studentIdController.text.trim()) // Student ID lookup
             .single();
 
         // Check if student exists and the password matches
@@ -39,11 +38,10 @@ class _LoginPageState extends State<LoginPage> {
           // If password matches, login is successful
           if (mounted) {
             Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const StudentDashboard(),
-              ),
-            );
+                context,
+                MaterialPageRoute(
+                    builder: (context) => StudentDashboard(
+                        studentId: _studentIdController.text.trim())));
           }
         } else {
           // Show error if student ID or password doesn't match

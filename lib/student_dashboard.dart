@@ -65,7 +65,8 @@ class Section {
 }
 
 class StudentDashboard extends StatefulWidget {
-  const StudentDashboard({super.key});
+  final String studentId;
+  const StudentDashboard({super.key, required this.studentId});
 
   @override
   StudentDashboardState createState() => StudentDashboardState();
@@ -223,7 +224,7 @@ class StudentDashboardState extends State<StudentDashboard> {
                                 MaterialPageRoute(
                                   builder: (context) => ViewGradeDetails(
                                     title: section.displayName,
-                                    studentId: 2,
+                                    studentId: int.parse(widget.studentId),
                                   ),
                                 ),
                               );
