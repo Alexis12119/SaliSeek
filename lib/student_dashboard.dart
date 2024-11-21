@@ -6,6 +6,34 @@ import 'package:SaliSeek/view_grade_details.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/material.dart';
 
+class Course {
+  final String id;
+  final String name;
+  final String code;
+  final int semester;
+  final int yearNumber;
+
+  Course({
+    required this.id,
+    required this.name,
+    required this.code,
+    required this.semester,
+    required this.yearNumber,
+  });
+
+  factory Course.fromJson(Map<String, dynamic> json) {
+    return Course(
+      id: json['id'].toString(),
+      name: json['name'],
+      code: json['code'],
+      semester: int.parse(json['semester'].toString()),
+      yearNumber: int.parse(json['year_number'].toString()),
+    );
+  }
+
+  String get displayName => '$name ($code)';
+}
+
 class Section {
   final String id;
   final String name;
@@ -76,7 +104,9 @@ class StudentDashboardState extends State<StudentDashboard> {
   final ScrollController _gradeScrollController = ScrollController();
   final ScrollController _courseScrollController = ScrollController();
   final ScrollController _archivedScrollController = ScrollController();
-
+  String? _studentName;
+  String? _studentNumber;
+  String? _profileImageUrl;
   List<Section> _sections = [];
   bool _isLoading = true;
 
@@ -84,6 +114,102 @@ class StudentDashboardState extends State<StudentDashboard> {
   void initState() {
     super.initState();
     _loadSections();
+    _loadCourses();
+    _loadStudentProfile(); // New method
+  }
+
+  List<Course> _courses = [];
+  bool _isLoadingCourses = true;
+
+  Future<void> _loadStudentProfile() async {
+    try {
+      final studentResponse = await Supabase.instance.client
+          .from('students')
+          .select('last_name, id')
+          .eq('id', widget.studentId)
+          .single();
+
+      setState(() {
+        _studentName =
+            '${studentResponse['last_name']}';
+        _studentNumber = studentResponse['id'].toString();
+      });
+    } catch (e) {
+      print('Error loading student profile: $e');
+      setState(() {
+        _studentName = 'Unable to load name';
+        _studentNumber = 'Unknown';
+      });
+    }
+  }
+
+  Widget buildProfileSection() {
+    return Container(
+      color: const Color(0xFFF2F8FC),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+      child: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            CircleAvatar(
+              radius: 40,
+              backgroundColor: Colors.grey[300],
+              backgroundImage: _profileImageUrl != null
+                  ? NetworkImage(_profileImageUrl!)
+                  : null,
+              child: _profileImageUrl == null
+                  ? const Icon(Icons.person, size: 50, color: Colors.green)
+                  : null,
+            ),
+            const SizedBox(width: 16.0),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _studentName ?? 'Loading...',
+                  style: const TextStyle(
+                    fontSize: 18.0,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 8.0),
+                Text(
+                  'Student ID: ${_studentNumber ?? 'Unknown'}',
+                  style: const TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _loadCourses() async {
+    try {
+      final response = await Supabase.instance.client
+          .from('student_courses')
+          .select('course:course_id (id, name, code, semester, year_number)')
+          .eq('student_id', widget.studentId);
+
+      final courses = (response as List)
+          .map((data) => Course.fromJson(data['course']))
+          .toList();
+
+      setState(() {
+        _courses = courses;
+        _isLoadingCourses = false;
+      });
+    } catch (e) {
+      print('Error loading courses: $e');
+      setState(() {
+        _isLoadingCourses = false;
+      });
+    }
   }
 
   Future<void> _loadSections() async {
@@ -145,47 +271,50 @@ class StudentDashboardState extends State<StudentDashboard> {
               buildSectionWithArrows(
                 title: 'Courses:',
                 scrollController: _courseScrollController,
-                items: [
-                  'Understanding the Self',
-                  'Mathematics In the Modern World',
-                  'Programming Fundamentals',
-                  'Data Structures and Algorithms',
-                  'Database Systems',
-                  'Computer Networks',
-                  'Software Engineering',
-                  'Web Development',
-                ],
+                items: _isLoadingCourses
+                    ? [] // Show a loading indicator when data is loading
+                    : _courses.map((course) => course.displayName).toList(),
                 onTilePressed: (title) {
+                  final selectedCourse = _courses
+                      .firstWhere((course) => course.displayName == title);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => CourseDetails(title: title),
+                      builder: (context) => CourseDetails(
+                        title: selectedCourse.name,
+                        studentId: widget.studentId,
+                        courseId: selectedCourse.id,
+                      ),
                     ),
                   );
                 },
-                tileType: (title) => ClassTile(title), // Use ClassTile here
+                tileType: (title) =>
+                    ClassTile(title), // Use ClassTile for display
               ),
 
               // Archived Classes Section
               buildSectionWithArrows(
                 title: 'Archived Classes:',
                 scrollController: _archivedScrollController,
-                items: [
-                  'History of Art',
-                  'Introduction to Psychology',
-                  'Ethics in Technology',
-                  'Web Design Basics',
-                  'Digital Marketing Strategies',
-                ],
+                items: _isLoadingCourses
+                    ? [] // Show a loading indicator when data is loading
+                    : _courses.map((course) => course.displayName).toList(),
                 onTilePressed: (title) {
+                  final selectedCourse = _courses
+                      .firstWhere((course) => course.displayName == title);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => CourseDetails(title: title),
+                      builder: (context) => CourseDetails(
+                        title: selectedCourse.name,
+                        studentId: widget.studentId,
+                        courseId: selectedCourse.id,
+                      ),
                     ),
                   );
                 },
-                tileType: (title) => ClassTile(title), // Use ClassTile here
+                tileType: (title) =>
+                    ClassTile(title), // Use ClassTile for display
               ),
             ],
           ),
@@ -380,47 +509,47 @@ class StudentDashboardState extends State<StudentDashboard> {
   }
 
   // Profile section
-  Widget buildProfileSection() {
-    return Container(
-      color: const Color(0xFFF2F8FC),
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-      child: Center(
-        child: Row(
-          mainAxisAlignment:
-              MainAxisAlignment.center, // Center items within the Row
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 40,
-              backgroundColor: Colors.grey[300],
-              child: const Icon(Icons.person, size: 50, color: Colors.green),
-            ),
-            const SizedBox(width: 16.0),
-            const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Name: Unknown',
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    color: Colors.black,
-                  ),
-                ),
-                SizedBox(height: 8.0),
-                Text(
-                  'Student ID: 12-345',
-                  style: TextStyle(
-                    fontSize: 16.0,
-                    color: Colors.black,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget buildProfileSection() {
+  //   return Container(
+  //     color: const Color(0xFFF2F8FC),
+  //     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+  //     child: Center(
+  //       child: Row(
+  //         mainAxisAlignment:
+  //             MainAxisAlignment.center, // Center items within the Row
+  //         crossAxisAlignment: CrossAxisAlignment.center,
+  //         children: [
+  //           CircleAvatar(
+  //             radius: 40,
+  //             backgroundColor: Colors.grey[300],
+  //             child: const Icon(Icons.person, size: 50, color: Colors.green),
+  //           ),
+  //           const SizedBox(width: 16.0),
+  //           const Column(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //               Text(
+  //                 'Name: Unknown',
+  //                 style: TextStyle(
+  //                   fontSize: 18.0,
+  //                   color: Colors.black,
+  //                 ),
+  //               ),
+  //               SizedBox(height: 8.0),
+  //               Text(
+  //                 'Student ID: 12-345',
+  //                 style: TextStyle(
+  //                   fontSize: 16.0,
+  //                   color: Colors.black,
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   // Widget for sections with arrows
   Widget buildSectionWithArrows({
