@@ -188,6 +188,8 @@ class StudentDashboardState extends State<StudentDashboard> {
     );
   }
 
+  List<Course> _archivedCourses = [];
+
   Future<void> _loadCourses() async {
     try {
       // Fetch the student's current year and semester
@@ -202,7 +204,7 @@ class StudentDashboardState extends State<StudentDashboard> {
       final currentSemester =
           int.parse(studentResponse['section']['semester'].toString());
 
-      // Fetch courses and filter based on the student's year and semester
+      // Fetch courses
       final response = await Supabase.instance.client
           .from('student_courses')
           .select('course:course_id (id, name, code, semester, year_number)')
@@ -210,13 +212,24 @@ class StudentDashboardState extends State<StudentDashboard> {
 
       final courses = (response as List)
           .map((data) => Course.fromJson(data['course']))
+          .toList();
+
+      // Separate courses into active and archived
+      final activeCourses = courses
+          .where((course) => (course.yearNumber == currentYear &&
+              course.semester == currentSemester))
+          .toList();
+
+      final archivedCourses = courses
           .where((course) =>
-              course.yearNumber == currentYear &&
-              course.semester == currentSemester)
+              course.yearNumber < currentYear ||
+              (course.yearNumber == currentYear &&
+                  course.semester < currentSemester))
           .toList();
 
       setState(() {
-        _courses = courses;
+        _courses = activeCourses;
+        _archivedCourses = archivedCourses;
         _isLoadingCourses = false;
       });
     } catch (e) {
@@ -282,7 +295,7 @@ class StudentDashboardState extends State<StudentDashboard> {
               // View Grades Section
               buildGradeSection(),
 
-              // Courses Section
+              // Active Classes Section
               buildSectionWithArrows(
                 title: 'Courses:',
                 scrollController: _courseScrollController,
@@ -313,9 +326,11 @@ class StudentDashboardState extends State<StudentDashboard> {
                 scrollController: _archivedScrollController,
                 items: _isLoadingCourses
                     ? [] // Show a loading indicator when data is loading
-                    : _courses.map((course) => course.displayName).toList(),
+                    : _archivedCourses
+                        .map((course) => course.displayName)
+                        .toList(),
                 onTilePressed: (title) {
-                  final selectedCourse = _courses
+                  final selectedCourse = _archivedCourses
                       .firstWhere((course) => course.displayName == title);
                   Navigator.push(
                     context,
