@@ -37,6 +37,8 @@ class _DetailsPageState extends State<DetailsPage> {
       dueDate = response['due_date'];
       description = response['description'];
       activityLink = response['url'];
+      urlController.text =
+          activityLink ?? ''; // Set the URL field with the fetched URL
     });
   }
 
