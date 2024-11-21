@@ -14,6 +14,21 @@ class CourseTile extends StatelessWidget {
     required this.finalGrade,
   });
 
+
+  String formatGrade(String grade) {
+    // If the grade is already in the desired format, return it
+    if (grade.contains('.')) {
+      // If it's already a decimal like 1.25, keep it as is
+      if (grade.split('.')[1].length > 2) return grade;
+      
+      // If it's a whole number or has one decimal place, format to two decimal places
+      return double.parse(grade).toStringAsFixed(2);
+    }
+    
+    // If it's a whole number, convert to two decimal places
+    return double.parse(grade).toStringAsFixed(2);
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -67,7 +82,7 @@ class CourseTile extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        midtermGrade,
+                        formatGrade(midtermGrade),
                         style: TextStyle(
                           fontSize: gradeFontSize,
                           fontWeight: FontWeight.bold,
@@ -75,7 +90,7 @@ class CourseTile extends StatelessWidget {
                       ),
                       SizedBox(width: gradeSpacing),
                       Text(
-                        finalGrade,
+                        formatGrade(finalGrade),
                         style: TextStyle(
                           fontSize: gradeFontSize,
                           fontWeight: FontWeight.bold,

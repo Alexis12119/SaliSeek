@@ -3,7 +3,66 @@ import 'package:SaliSeek/course_details.dart';
 import 'package:SaliSeek/login_page.dart';
 import 'package:SaliSeek/semester_tile.dart';
 import 'package:SaliSeek/view_grade_details.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/material.dart';
+
+class Section {
+  final String id;
+  final String name;
+  final String programId;
+  final int yearNumber;
+  final int semester;
+
+  Section({
+    required this.id,
+    required this.name,
+    required this.programId,
+    required this.yearNumber,
+    required this.semester,
+  });
+
+  factory Section.fromJson(Map<String, dynamic> json) {
+    return Section(
+      id: json['id'].toString(),
+      name: json['name'].toString(),
+      programId: json['program_id'].toString(),
+      yearNumber: int.parse(json['year_number'].toString()),
+      semester: int.parse(json['semester'].toString()),
+    );
+  }
+
+  String get displayName {
+    String yearString;
+    String semesterString;
+    switch (yearNumber) {
+      case 1:
+        yearString = '1st';
+        break;
+      case 2:
+        yearString = '2nd';
+        break;
+      case 3:
+        yearString = '3rd';
+        break;
+      default:
+        yearString = '${yearNumber}th';
+    }
+    switch (semester) {
+      case 1:
+        semesterString = '1st';
+        break;
+      case 2:
+        semesterString = '2nd';
+        break;
+      case 3:
+        semesterString = '3rd';
+        break;
+      default:
+        semesterString = '${semester}th';
+    }
+    return '$yearString Year $semesterString Semester';
+  }
+}
 
 class StudentDashboard extends StatefulWidget {
   const StudentDashboard({super.key});
@@ -16,6 +75,38 @@ class StudentDashboardState extends State<StudentDashboard> {
   final ScrollController _gradeScrollController = ScrollController();
   final ScrollController _courseScrollController = ScrollController();
   final ScrollController _archivedScrollController = ScrollController();
+
+  List<Section> _sections = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSections();
+  }
+
+  Future<void> _loadSections() async {
+    try {
+      final response = await Supabase.instance.client
+          .from('section')
+          .select()
+          .order('year_number')
+          .order('semester');
+
+      final sections = (response as List)
+          .map((section) => Section.fromJson(section))
+          .toList();
+
+      setState(() {
+        _sections = sections;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,30 +122,7 @@ class StudentDashboardState extends State<StudentDashboard> {
               buildProfileSection(),
 
               // View Grades Section
-              buildSectionWithArrows(
-                title: 'View Grades:',
-                scrollController: _gradeScrollController,
-                items: [
-                  '1st Year 1st Semester',
-                  '1st Year 2nd Semester',
-                  '2nd Year 1st Semester',
-                  '2nd Year 2nd Semester',
-                  '3rd Year 1st Semester',
-                  '3rd Year 2nd Semester',
-                  '4th Year 1st Semester',
-                  '4th Year 2nd Semester',
-                ],
-                onTilePressed: (title) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ViewGradeDetails(title: title),
-                    ),
-                  );
-                },
-                tileType: (title) =>
-                    SemesterTile(title), // Use SemesterTile here
-              ),
+              buildGradeSection(),
 
               // Courses Section
               buildSectionWithArrows(
@@ -105,6 +173,72 @@ class StudentDashboardState extends State<StudentDashboard> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget buildGradeSection() {
+    if (_isLoading) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+    return Container(
+      color: const Color(0xFFF2F8FC),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              'View Grades:',
+              style: TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30.0),
+            child: SizedBox(
+              height: 150,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      controller: _gradeScrollController,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _sections.length,
+                      itemBuilder: (context, index) {
+                        final section = _sections[index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ViewGradeDetails(
+                                    title: section.displayName,
+                                    studentId: 2,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: SemesterTile(section.displayName),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
