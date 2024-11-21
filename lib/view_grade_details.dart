@@ -76,7 +76,9 @@ class ViewGradeDetailsState extends State<ViewGradeDetails> {
       print(
           'Student Section - ID: $sectionId, Year: $sectionYearNumber, Semester: $sectionSemester');
 
-      // Fetch all college courses that match the section's year and semester
+      List<Course> courses = [];
+
+      // Fetch courses for the specific year and semester
       final courseResponse = await supabase
           .from('college_course')
           .select('id, name, code, year_number, semester')
@@ -85,26 +87,26 @@ class ViewGradeDetailsState extends State<ViewGradeDetails> {
 
       print('Matching Courses: $courseResponse');
 
-      List<Course> courses = [];
-
       for (var courseData in courseResponse) {
         final courseId = courseData['id'];
         print('Processing Course: $courseData');
 
+        // Check if the course exists in student_courses
         final existingCourseResponse = await supabase
             .from('student_courses')
             .select('''
-            course_id, 
-            midterm_grade, 
-            final_grade, 
-            college_course:course_id (code, name)
-          ''')
+          course_id, 
+          midterm_grade, 
+          final_grade, 
+          college_course:course_id (code, name)
+        ''')
             .eq('student_id', widget.studentId)
             .eq('course_id', courseId)
             .maybeSingle();
 
         Course course;
         if (existingCourseResponse != null) {
+          // Course exists in student_courses
           course = Course(
             courseCode:
                 existingCourseResponse['college_course']['code'].toString(),
@@ -113,29 +115,36 @@ class ViewGradeDetailsState extends State<ViewGradeDetails> {
             midtermGrade: existingCourseResponse['midterm_grade'].toString(),
             finalGrade: existingCourseResponse['final_grade'].toString(),
           );
+
+          courses.add(course);
         } else {
-          // Course doesn't exist, insert and use default grades
-          final insertResponse = await supabase.from('student_courses').insert({
-            'student_id': widget.studentId,
-            'course_id': courseId,
-            'midterm_grade': 5.00,
-            'final_grade': 5.00
-          }).select('''
+          // Course doesn't exist in student_courses, so insert it
+          try {
+            final insertResponse =
+                await supabase.from('student_courses').insert({
+              'student_id': widget.studentId,
+              'course_id': courseId,
+              'midterm_grade': 5.00,
+              'final_grade': 5.00
+            }).select('''
               course_id, 
               midterm_grade, 
               final_grade, 
               college_course:course_id (code, name)
             ''').single();
 
-          course = Course(
-            courseCode: insertResponse['college_course']['code'].toString(),
-            courseTitle: insertResponse['college_course']['name'].toString(),
-            midtermGrade: insertResponse['midterm_grade'].toString(),
-            finalGrade: insertResponse['final_grade'].toString(),
-          );
-        }
+            course = Course(
+              courseCode: insertResponse['college_course']['code'].toString(),
+              courseTitle: insertResponse['college_course']['name'].toString(),
+              midtermGrade: insertResponse['midterm_grade'].toString(),
+              finalGrade: insertResponse['final_grade'].toString(),
+            );
 
-        courses.add(course);
+            courses.add(course);
+          } catch (insertError) {
+            print('Error inserting course: $insertError');
+          }
+        }
       }
 
       print('Courses processed: ${courses.length}');

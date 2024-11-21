@@ -88,9 +88,24 @@ class StudentDashboardState extends State<StudentDashboard> {
 
   Future<void> _loadSections() async {
     try {
+      // First, fetch the student's details including program and current year
+      final studentResponse = await Supabase.instance.client
+          .from('students')
+          .select('program_id, section:section_id (year_number)')
+          .eq('id', widget.studentId)
+          .single();
+
+      final programId = studentResponse['program_id'].toString();
+      final currentYear =
+          int.parse(studentResponse['section']['year_number'].toString());
+
+      // Fetch sections that match the student's program
       final response = await Supabase.instance.client
           .from('section')
           .select()
+          .eq('program_id', programId)
+          .lte('year_number',
+              currentYear) // Only fetch sections up to current year
           .order('year_number')
           .order('semester');
 
@@ -103,6 +118,7 @@ class StudentDashboardState extends State<StudentDashboard> {
         _isLoading = false;
       });
     } catch (e) {
+      print('Error loading sections: $e');
       setState(() {
         _isLoading = false;
       });
