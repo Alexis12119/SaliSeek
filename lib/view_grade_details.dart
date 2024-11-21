@@ -7,12 +7,16 @@ class Course {
   final String courseTitle;
   final String midtermGrade;
   final String finalGrade;
+  final String semester;
+  final String yearNumber;
 
   Course({
     required this.courseCode,
     required this.courseTitle,
     required this.midtermGrade,
     required this.finalGrade,
+    required this.semester,
+    required this.yearNumber,
   });
 
   factory Course.fromJson(Map<String, dynamic> json) {
@@ -21,6 +25,8 @@ class Course {
       courseTitle: json['course_title'].toString(),
       midtermGrade: json['midterm_grade'].toString(),
       finalGrade: json['final_grade'].toString(),
+      semester: json['semester'].toString(),
+      yearNumber: json['year_number'].toString(),
     );
   }
 }
@@ -59,19 +65,19 @@ class ViewGradeDetailsState extends State<ViewGradeDetails> {
 // Student Courses Table
 // INSERT INTO "public"."student_courses" ("student_id", "course_id", "midterm_grade", "final_grade") VALUES ('1', '1', '5', '3'), ('2', '1', '3', '3'), ('2', '3', '1.5', '1.25');
   Future<List<Course>> fetchCourses() async {
-    try {
-      // First, fetch the student's section details
-      final sectionResponse = await supabase
-          .from('students')
-          .select('section:section_id (id, year_number, semester)')
-          .eq('id', widget.studentId)
-          .single();
+    // First, fetch the student's section details
+    final sectionResponse = await supabase
+        .from('students')
+        .select('section:section_id (id, year_number, semester)')
+        .eq('id', widget.studentId)
+        .single();
 
+    try {
       final sectionId = sectionResponse['section']['id'];
       final sectionYearNumber =
-          int.parse(sectionResponse['section']['year_number'].toString());
+          sectionResponse['section']['year_number'].toString();
       final sectionSemester =
-          int.parse(sectionResponse['section']['semester'].toString());
+          sectionResponse['section']['semester'].toString();
 
       print(
           'Student Section - ID: $sectionId, Year: $sectionYearNumber, Semester: $sectionSemester');
@@ -98,6 +104,8 @@ class ViewGradeDetailsState extends State<ViewGradeDetails> {
           course_id, 
           midterm_grade, 
           final_grade, 
+          semester,
+          year_number,
           college_course:course_id (code, name)
         ''')
             .eq('student_id', widget.studentId)
@@ -114,6 +122,8 @@ class ViewGradeDetailsState extends State<ViewGradeDetails> {
                 existingCourseResponse['college_course']['name'].toString(),
             midtermGrade: existingCourseResponse['midterm_grade'].toString(),
             finalGrade: existingCourseResponse['final_grade'].toString(),
+            yearNumber: existingCourseResponse['year_number'].toString(),
+            semester: existingCourseResponse['semester'].toString(),
           );
 
           courses.add(course);
@@ -138,6 +148,8 @@ class ViewGradeDetailsState extends State<ViewGradeDetails> {
               courseTitle: insertResponse['college_course']['name'].toString(),
               midtermGrade: insertResponse['midterm_grade'].toString(),
               finalGrade: insertResponse['final_grade'].toString(),
+              semester: insertResponse['semester'].toString(),
+              yearNumber: insertResponse['year_number'].toString(),
             );
 
             courses.add(course);

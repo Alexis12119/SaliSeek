@@ -130,8 +130,7 @@ class StudentDashboardState extends State<StudentDashboard> {
           .single();
 
       setState(() {
-        _studentName =
-            '${studentResponse['last_name']}';
+        _studentName = '${studentResponse['last_name']}';
         _studentNumber = studentResponse['id'].toString();
       });
     } catch (e) {
@@ -191,6 +190,19 @@ class StudentDashboardState extends State<StudentDashboard> {
 
   Future<void> _loadCourses() async {
     try {
+      // Fetch the student's current year and semester
+      final studentResponse = await Supabase.instance.client
+          .from('students')
+          .select('section:section_id (year_number, semester)')
+          .eq('id', widget.studentId)
+          .single();
+
+      final currentYear =
+          int.parse(studentResponse['section']['year_number'].toString());
+      final currentSemester =
+          int.parse(studentResponse['section']['semester'].toString());
+
+      // Fetch courses and filter based on the student's year and semester
       final response = await Supabase.instance.client
           .from('student_courses')
           .select('course:course_id (id, name, code, semester, year_number)')
@@ -198,6 +210,9 @@ class StudentDashboardState extends State<StudentDashboard> {
 
       final courses = (response as List)
           .map((data) => Course.fromJson(data['course']))
+          .where((course) =>
+              course.yearNumber == currentYear &&
+              course.semester == currentSemester)
           .toList();
 
       setState(() {
