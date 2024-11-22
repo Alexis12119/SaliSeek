@@ -4,14 +4,12 @@ class CourseTile extends StatelessWidget {
   final String courseCode;
   final String courseName;
   final String midtermGrade;
-  final String finalGrade;
 
   const CourseTile({
     super.key,
     required this.courseCode,
     required this.courseName,
     required this.midtermGrade,
-    required this.finalGrade,
   });
 
 
@@ -89,13 +87,6 @@ class CourseTile extends StatelessWidget {
                         ),
                       ),
                       SizedBox(width: gradeSpacing),
-                      Text(
-                        formatGrade(finalGrade),
-                        style: TextStyle(
-                          fontSize: gradeFontSize,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
                     ],
                   ),
                   Row(
@@ -105,10 +96,6 @@ class CourseTile extends StatelessWidget {
                         style: TextStyle(fontSize: gradeFontSize - 2),
                       ),
                       SizedBox(width: gradeSpacing - 4),
-                      Text(
-                        'Finals',
-                        style: TextStyle(fontSize: gradeFontSize - 2),
-                      ),
                     ],
                   ),
                 ],

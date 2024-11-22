@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:SaliSeek/course_tile.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+// Students Table
+// INSERT INTO "public"."students" ("id", "email", "password", "last_name", "type", "section_id", "program_id", "department_id", "grade_status") VALUES ('1', 'test@gmail.com', 'test123', 'Test', 'Regular', '2', '1', '1', 'Pending'), ('2', 'corporal461@gmail.com', 'Alexis-121', 'Alexis', 'Regular', '1', '1', '1', 'Pending');
+
+// Teachers Table
+// INSERT INTO "public"."teacher" ("id", "first_name", "email", "password", "last_name", "course_id") VALUES ('1', 'Hensonn', 'henz@gmail.com', 'admin', 'Palomado', '2'), ('2', 'Audrey', 'audrey@gmail.com', 'audrey123', 'Alinea', '3');
+
+// College Course Table
+// INSERT INTO "public"."college_course" ("id", "name", "year_number", "code", "semester") VALUES ('1', 'Networking 2', '2', 'NET212', '2'), ('2', 'Advanced Software Development', '3', 'ITProfEL1', '1'), ('3', 'Computer Programming 1', '1', 'CC111', '2'), ('4', 'Computer Programming 2', '1', 'CC112', '2'), ('5', 'Computer Programming 3', '2', 'CC123', '1'), ('6', 'Capstone 1', '3', 'CP111', '2'), ('7', 'Teleportation 1', '4', 'TP111', '1'), ('8', 'Teleportation 2', '4', 'TP222', '2'), ('9', 'Living in the IT Era', '1', 'LITE', '1');
+
+// Student Courses Table
+// INSERT INTO "public"."student_courses" ("student_id", "course_id", "midterm_grade") VALUES ('2', '3', '5'), ('2', '4', '5'), ('2', '9', '5');
 
 class Course {
   final String courseCode;
   final String courseTitle;
   final String midtermGrade;
-  final String finalGrade;
-  final String semester;
-  final String yearNumber;
 
   Course({
     required this.courseCode,
     required this.courseTitle,
     required this.midtermGrade,
-    required this.finalGrade,
-    required this.semester,
-    required this.yearNumber,
   });
 
   factory Course.fromJson(Map<String, dynamic> json) {
@@ -24,9 +29,6 @@ class Course {
       courseCode: json['course_code'].toString(),
       courseTitle: json['course_title'].toString(),
       midtermGrade: json['midterm_grade'].toString(),
-      finalGrade: json['final_grade'].toString(),
-      semester: json['semester'].toString(),
-      yearNumber: json['year_number'].toString(),
     );
   }
 }
@@ -34,9 +36,11 @@ class Course {
 class ViewGradeDetails extends StatefulWidget {
   final String title;
   final int studentId;
+  final int yearNumber;
+  final int semester;
 
   const ViewGradeDetails(
-      {super.key, required this.title, required this.studentId});
+      {super.key, required this.title, required this.studentId, required this.yearNumber, required this.semester});
 
   @override
   ViewGradeDetailsState createState() => ViewGradeDetailsState();
@@ -53,113 +57,65 @@ class ViewGradeDetailsState extends State<ViewGradeDetails> {
     futureCourses = fetchCourses();
   }
 
-// Students Table
-// INSERT INTO "public"."students" ("id", "email", "password", "last_name", "type", "section_id", "program_id", "department_id", "grade_status", "midterm_grade", "final_grade") VALUES ('1', 'test@gmail.com', 'test123', 'Test', 'Regular', '1', '1', '1', 'Pending', '5', '5'), ('2', 'corporal461@gmail.com', 'Alexis-121', 'Alexis', 'Regular', '1', '1', '1', 'Pending', '5', '5');
-
-// Sections Table
-// INSERT INTO "public"."section" ("id", "name", "program_id", "year_number", "semester") VALUES ('1', 'C', '1', '1', '1');
-
-// Courses Table
-// INSERT INTO "public"."college_course" ("id", "name", "year_number", "code", "semester") VALUES ('1', 'Networking 2', '2', 'NET212', '2'), ('2', 'Advanced Software Development', '3', 'ITProfEL1', '1'), ('3', 'Computer Programming 1', '1', 'CC111', '1'), ('4', 'Computer Programming 2', '1', 'CC112', '2'), ('5', 'Computer Programming 3', '1', 'CC123', '1'), ('6', 'Capstone 1', '3', 'CP111', '2'), ('7', 'Teleportation 1', '4', 'TP111', '1'), ('8', 'Teleportation 2', '4', 'TP222', '2');
-
-// Student Courses Table
-// INSERT INTO "public"."student_courses" ("student_id", "course_id", "midterm_grade", "final_grade") VALUES ('1', '1', '5', '3'), ('2', '1', '3', '3'), ('2', '3', '1.5', '1.25');
   Future<List<Course>> fetchCourses() async {
-    // First, fetch the student's section details
-    final sectionResponse = await supabase
-        .from('students')
-        .select('section:section_id (id, year_number, semester)')
-        .eq('id', widget.studentId)
-        .single();
-
     try {
-      final sectionId = sectionResponse['section']['id'];
-      final sectionYearNumber =
-          sectionResponse['section']['year_number'].toString();
-      final sectionSemester =
-          sectionResponse['section']['semester'].toString();
-
-      print(
-          'Student Section - ID: $sectionId, Year: $sectionYearNumber, Semester: $sectionSemester');
-
-      List<Course> courses = [];
-
-      // Fetch courses for the specific year and semester
+      // Fetch all courses for the specified year and semester
       final courseResponse = await supabase
           .from('college_course')
           .select('id, name, code, year_number, semester')
-          .eq('year_number', sectionYearNumber)
-          .eq('semester', sectionSemester);
+          .eq('year_number', widget.yearNumber)
+          .eq('semester', widget.semester);
 
-      print('Matching Courses: $courseResponse');
+      if (courseResponse.isEmpty) {
+        return [];
+      }
+
+      // Fetch all existing student_courses for the student
+      final studentCoursesResponse = await supabase
+          .from('student_courses')
+          .select('course_id, midterm_grade')
+          .eq('student_id', widget.studentId);
+
+      final Map<int, dynamic> studentCoursesMap = {
+        for (var course in studentCoursesResponse) course['course_id']: course
+      };
+
+      List<Course> courses = [];
 
       for (var courseData in courseResponse) {
         final courseId = courseData['id'];
-        print('Processing Course: $courseData');
 
-        // Check if the course exists in student_courses
-        final existingCourseResponse = await supabase
-            .from('student_courses')
-            .select('''
-          course_id, 
-          midterm_grade, 
-          final_grade, 
-          semester,
-          year_number,
-          college_course:course_id (code, name)
-        ''')
-            .eq('student_id', widget.studentId)
-            .eq('course_id', courseId)
-            .maybeSingle();
-
-        Course course;
-        if (existingCourseResponse != null) {
-          // Course exists in student_courses
-          course = Course(
-            courseCode:
-                existingCourseResponse['college_course']['code'].toString(),
-            courseTitle:
-                existingCourseResponse['college_course']['name'].toString(),
-            midtermGrade: existingCourseResponse['midterm_grade'].toString(),
-            finalGrade: existingCourseResponse['final_grade'].toString(),
-            yearNumber: existingCourseResponse['year_number'].toString(),
-            semester: existingCourseResponse['semester'].toString(),
-          );
-
-          courses.add(course);
+        if (studentCoursesMap.containsKey(courseId)) {
+          // If the course exists in student_courses
+          final studentCourse = studentCoursesMap[courseId];
+          courses.add(Course(
+            courseCode: courseData['code'].toString(),
+            courseTitle: courseData['name'].toString(),
+            midtermGrade: studentCourse['midterm_grade'].toString(),
+          ));
         } else {
-          // Course doesn't exist in student_courses, so insert it
-          try {
-            final insertResponse =
-                await supabase.from('student_courses').insert({
-              'student_id': widget.studentId,
-              'course_id': courseId,
-              'midterm_grade': 5.00,
-              'final_grade': 5.00
-            }).select('''
-              course_id, 
-              midterm_grade, 
-              final_grade, 
-              college_course:course_id (code, name)
-            ''').single();
+          // Insert the course into student_courses with default grades
+          final insertResponse = await supabase
+              .from('student_courses')
+              .insert({
+                'student_id': widget.studentId,
+                'course_id': courseId,
+                'midterm_grade': 5.00,
+                'final_grade': 5.00,
+              })
+              .select('course_id, midterm_grade')
+              .maybeSingle();
 
-            course = Course(
-              courseCode: insertResponse['college_course']['code'].toString(),
-              courseTitle: insertResponse['college_course']['name'].toString(),
+          if (insertResponse != null) {
+            courses.add(Course(
+              courseCode: courseData['code'].toString(),
+              courseTitle: courseData['name'].toString(),
               midtermGrade: insertResponse['midterm_grade'].toString(),
-              finalGrade: insertResponse['final_grade'].toString(),
-              semester: insertResponse['semester'].toString(),
-              yearNumber: insertResponse['year_number'].toString(),
-            );
-
-            courses.add(course);
-          } catch (insertError) {
-            print('Error inserting course: $insertError');
+            ));
           }
         }
       }
 
-      print('Courses processed: ${courses.length}');
       return courses;
     } catch (e) {
       debugPrint('Error fetching courses: $e');
@@ -217,7 +173,6 @@ class ViewGradeDetailsState extends State<ViewGradeDetails> {
                           courseCode: course.courseCode,
                           courseName: course.courseTitle,
                           midtermGrade: course.midtermGrade,
-                          finalGrade: course.finalGrade,
                         );
                       },
                     );

@@ -5,7 +5,17 @@ import 'package:SaliSeek/semester_tile.dart';
 import 'package:SaliSeek/view_grade_details.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/material.dart';
+// Students Table
+// INSERT INTO "public"."students" ("id", "email", "password", "last_name", "type", "section_id", "program_id", "department_id", "grade_status") VALUES ('1', 'test@gmail.com', 'test123', 'Test', 'Regular', '2', '1', '1', 'Pending'), ('2', 'corporal461@gmail.com', 'Alexis-121', 'Alexis', 'Regular', '1', '1', '1', 'Pending');
 
+// Teachers Table
+// INSERT INTO "public"."teacher" ("id", "first_name", "email", "password", "last_name", "course_id") VALUES ('1', 'Hensonn', 'henz@gmail.com', 'admin', 'Palomado', '2'), ('2', 'Audrey', 'audrey@gmail.com', 'audrey123', 'Alinea', '3');
+
+// College Course Table
+// INSERT INTO "public"."college_course" ("id", "name", "year_number", "code", "semester") VALUES ('1', 'Networking 2', '2', 'NET212', '2'), ('2', 'Advanced Software Development', '3', 'ITProfEL1', '1'), ('3', 'Computer Programming 1', '1', 'CC111', '2'), ('4', 'Computer Programming 2', '1', 'CC112', '2'), ('5', 'Computer Programming 3', '2', 'CC123', '1'), ('6', 'Capstone 1', '3', 'CP111', '2'), ('7', 'Teleportation 1', '4', 'TP111', '1'), ('8', 'Teleportation 2', '4', 'TP222', '2'), ('9', 'Living in the IT Era', '1', 'LITE', '1');
+
+// Student Courses Table
+// INSERT INTO "public"."student_courses" ("student_id", "course_id", "midterm_grade") VALUES ('2', '3', '5'), ('2', '4', '5'), ('2', '9', '5');
 class Course {
   final String id;
   final String name;
@@ -107,15 +117,14 @@ class StudentDashboardState extends State<StudentDashboard> {
   String? _studentName;
   String? _studentNumber;
   String? _profileImageUrl;
-  List<Section> _sections = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadSections();
     _loadCourses();
     _loadStudentProfile(); // New method
+    _loadPreviousSemesters();
   }
 
   List<Course> _courses = [];
@@ -188,6 +197,55 @@ class StudentDashboardState extends State<StudentDashboard> {
     );
   }
 
+  List<Section> _previousSemesters = [];
+
+  Future<void> _loadPreviousSemesters() async {
+    try {
+      final response = await Supabase.instance.client
+          .from('student_courses')
+          .select('course:course_id (year_number, semester)')
+          .eq('student_id', widget.studentId);
+      print(response);
+
+      final courses = (response as List)
+          .map((data) => Section.fromJson(data['course']))
+          .toList();
+
+      // Remove duplicates by checking each item in the list
+      List<Section> uniqueSemesters = [];
+      for (var course in courses) {
+        bool isDuplicate = false;
+
+        for (var existing in uniqueSemesters) {
+          if (existing.yearNumber == course.yearNumber &&
+              existing.semester == course.semester) {
+            isDuplicate = true;
+            break;
+          }
+        }
+
+        if (!isDuplicate) {
+          uniqueSemesters.add(course);
+        }
+      }
+
+      // Sort the unique semesters
+      uniqueSemesters.sort((a, b) {
+        if (a.yearNumber != b.yearNumber) {
+          return a.yearNumber.compareTo(b.yearNumber);
+        }
+        return a.semester.compareTo(b.semester);
+      });
+
+      setState(() {
+        _previousSemesters = uniqueSemesters;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading previous semesters: $e');
+    }
+  }
+
   List<Course> _archivedCourses = [];
 
   Future<void> _loadCourses() async {
@@ -240,44 +298,7 @@ class StudentDashboardState extends State<StudentDashboard> {
     }
   }
 
-  Future<void> _loadSections() async {
-    try {
-      // First, fetch the student's details including program and current year
-      final studentResponse = await Supabase.instance.client
-          .from('students')
-          .select('program_id, section:section_id (year_number)')
-          .eq('id', widget.studentId)
-          .single();
-
-      final programId = studentResponse['program_id'].toString();
-      final currentYear =
-          int.parse(studentResponse['section']['year_number'].toString());
-
-      // Fetch sections that match the student's program
-      final response = await Supabase.instance.client
-          .from('section')
-          .select()
-          .eq('program_id', programId)
-          .lte('year_number',
-              currentYear) // Only fetch sections up to current year
-          .order('year_number')
-          .order('semester');
-
-      final sections = (response as List)
-          .map((section) => Section.fromJson(section))
-          .toList();
-
-      setState(() {
-        _sections = sections;
-        _isLoading = false;
-      });
-    } catch (e) {
-      print('Error loading sections: $e');
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
+// INSERT INTO "public"."student_courses" ("student_id", "course_id", "midterm_grade", "final_grade", "year_number", "semester") VALUES ('2', '3', '5', '5', '', ''), ('2', '4', '5', '5', '', ''), ('2', '9', '5', '5', '', '');
 
   @override
   Widget build(BuildContext context) {
@@ -387,9 +408,9 @@ class StudentDashboardState extends State<StudentDashboard> {
                     child: ListView.builder(
                       controller: _gradeScrollController,
                       scrollDirection: Axis.horizontal,
-                      itemCount: _sections.length,
+                      itemCount: _previousSemesters.length,
                       itemBuilder: (context, index) {
-                        final section = _sections[index];
+                        final semester = _previousSemesters[index];
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 2.0),
                           child: GestureDetector(
@@ -398,13 +419,15 @@ class StudentDashboardState extends State<StudentDashboard> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => ViewGradeDetails(
-                                    title: section.displayName,
+                                    title: semester.displayName,
                                     studentId: int.parse(widget.studentId),
+                                    yearNumber: semester.yearNumber,
+                                    semester: semester.semester,
                                   ),
                                 ),
                               );
                             },
-                            child: SemesterTile(section.displayName),
+                            child: SemesterTile(semester.displayName),
                           ),
                         );
                       },
