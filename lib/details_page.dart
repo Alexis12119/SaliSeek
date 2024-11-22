@@ -171,7 +171,7 @@ class _DetailsPageState extends State<DetailsPage> {
                         child: ElevatedButton(
                           onPressed: isPastDueDate ? null : _updateURL,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2C9B44),
+                            backgroundColor: isPastDueDate ? Colors.red : const Color(0xFF2C9B44),
                             padding: const EdgeInsets.symmetric(vertical: 16.0),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8.0),
@@ -179,9 +179,9 @@ class _DetailsPageState extends State<DetailsPage> {
                           ),
                           child: Text(
                             isPastDueDate ? 'Submission Closed' : 'Submit URL',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16.0,
-                              color: Color(0xFFF2F8FC),
+                              color: isPastDueDate ? Colors.red : const Color(0xFFF2F8FC),
                             ),
                           ),
                         ),

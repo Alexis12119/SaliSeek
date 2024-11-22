@@ -134,12 +134,13 @@ class StudentDashboardState extends State<StudentDashboard> {
     try {
       final studentResponse = await Supabase.instance.client
           .from('students')
-          .select('last_name, id')
+          .select('first_name, last_name, id')
           .eq('id', widget.studentId)
           .single();
 
       setState(() {
-        _studentName = '${studentResponse['last_name']}';
+        _studentName =
+            '${studentResponse['first_name']} ${studentResponse['last_name']}';
         _studentNumber = studentResponse['id'].toString();
       });
     } catch (e) {

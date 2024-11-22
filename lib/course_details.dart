@@ -41,7 +41,8 @@ class CourseDetails extends StatelessWidget {
     try {
       final response = await supabase
           .from('tasks')
-          .select('id, due_date, description, student_id, students(last_name)')
+          .select(
+              'id, due_date, description, student_id, students(first_name,last_name)')
           .eq('course_id', courseId)
           .order('due_date', ascending: true);
 
@@ -243,8 +244,10 @@ class CourseDetails extends StatelessWidget {
                       final dueDate = DateTime.parse(task['due_date']);
                       final formattedDate =
                           DateFormat('MMM. dd').format(dueDate);
-                      final studentName =
-                          task['students']['last_name'] ?? 'Unknown';
+                      final studentName = task['students']['first_name'] +
+                              ' ' +
+                              task['students']['last_name'] ??
+                          'Unknown';
 
                       return Container(
                         margin: const EdgeInsets.only(bottom: 16.0),

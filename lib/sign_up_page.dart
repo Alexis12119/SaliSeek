@@ -11,6 +11,7 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -38,6 +39,7 @@ class _SignUpPageState extends State<SignUpPage> {
           // 2. Insert additional user data into students table
           await supabase.from('students').insert({
             'email': _emailController.text.trim(),
+            'first_name': _firstNameController.text.trim(),
             'last_name': _lastNameController.text.trim(),
             'password': _passwordController.text,
             // Note: We don't store the password in the students table as it's already
@@ -100,6 +102,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   void dispose() {
+    _firstNameController.dispose();
     _lastNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -149,6 +152,26 @@ class _SignUpPageState extends State<SignUpPage> {
                           ),
                           const SizedBox(height: 20.0),
                           const Text(
+                            'First Name',
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 4.0),
+                          TextFormField(
+                            controller: _lastNameController,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter your First Name',
+                              border: OutlineInputBorder(),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your First Name';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 4.0),
+                          const Text(
                             'Last Name',
                             style: TextStyle(
                                 fontSize: 14, fontWeight: FontWeight.bold),
@@ -167,7 +190,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 16.0),
+                          const SizedBox(height: 4.0),
                           const Text(
                             'Email',
                             style: TextStyle(
