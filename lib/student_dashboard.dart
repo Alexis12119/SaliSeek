@@ -111,6 +111,9 @@ class StudentDashboard extends StatefulWidget {
 }
 
 class StudentDashboardState extends State<StudentDashboard> {
+  List<Course> _courses = [];
+  bool _isLoadingCourses = true;
+
   final ScrollController _gradeScrollController = ScrollController();
   final ScrollController _courseScrollController = ScrollController();
   final ScrollController _archivedScrollController = ScrollController();
@@ -118,17 +121,108 @@ class StudentDashboardState extends State<StudentDashboard> {
   String? _studentNumber;
   String? _profileImageUrl;
   bool _isLoading = true;
+  List<RealtimeChannel> _subscriptions = [];
 
   @override
   void initState() {
     super.initState();
-    _loadCourses();
-    _loadStudentProfile(); // New method
-    _loadPreviousSemesters();
+    _loadInitialData();
+    _setupRealtimeSubscriptions();
   }
 
-  List<Course> _courses = [];
-  bool _isLoadingCourses = true;
+  List<Section> _previousSemesters = [];
+
+  List<Course> _archivedCourses = [];
+  @override
+  void dispose() {
+    // Clean up subscriptions when disposing
+    for (var subscription in _subscriptions) {
+      subscription.unsubscribe();
+    }
+    super.dispose();
+  }
+
+  Future<void> _loadInitialData() async {
+    await Future.wait([
+      _loadCourses(),
+      _loadStudentProfile(),
+      _loadPreviousSemesters(),
+    ]);
+  }
+
+  void _setupRealtimeSubscriptions() {
+  // Subscribe to student_courses changes
+  final coursesChannel = Supabase.instance.client
+      .channel('student_courses_changes')
+      .onPostgresChanges(
+        event: PostgresChangeEvent.all,
+        schema: 'public',
+        table: 'student_courses',
+        callback: (payload) async {
+          // Reload everything that depends on student_courses
+          await Future.wait([
+            _loadCourses(),
+            _loadPreviousSemesters(),
+          ]);
+        },
+      )
+      .subscribe();
+
+  // Subscribe to college_course changes
+  final collegeCoursesChannel = Supabase.instance.client
+      .channel('college_course_changes')
+      .onPostgresChanges(
+        event: PostgresChangeEvent.all,
+        schema: 'public',
+        table: 'college_course',
+        callback: (payload) async {
+          // Reload courses when college_course table changes
+          await Future.wait([
+            _loadCourses(),
+            _loadPreviousSemesters(),
+          ]);
+        },
+      )
+      .subscribe();
+
+  // Subscribe to students table for profile and section changes
+  final profileChannel = Supabase.instance.client
+      .channel('student_profile_changes')
+      .onPostgresChanges(
+        event: PostgresChangeEvent.all,
+        schema: 'public',
+        table: 'students',
+        callback: (payload) async {
+          // Reload profile and courses (since section might have changed)
+          await Future.wait([
+            _loadStudentProfile(),
+            _loadCourses(), // This needs to reload because active/archived status depends on current section
+          ]);
+        },
+      )
+      .subscribe();
+
+  // Subscribe to section changes
+  final sectionChannel = Supabase.instance.client
+      .channel('section_changes')
+      .onPostgresChanges(
+        event: PostgresChangeEvent.all,
+        schema: 'public',
+        table: 'sections',
+        callback: (payload) async {
+          // Reload courses when section information changes
+          await _loadCourses();
+        },
+      )
+      .subscribe();
+
+  _subscriptions.addAll([
+    coursesChannel,
+    collegeCoursesChannel,
+    profileChannel,
+    sectionChannel,
+  ]);
+  }
 
   Future<void> _loadStudentProfile() async {
     try {
@@ -138,120 +232,26 @@ class StudentDashboardState extends State<StudentDashboard> {
           .eq('id', widget.studentId)
           .single();
 
-      setState(() {
-        _studentName =
-            '${studentResponse['first_name']} ${studentResponse['last_name']}';
-        _studentNumber = studentResponse['id'].toString();
-      });
+      if (mounted) {
+        setState(() {
+          _studentName =
+              '${studentResponse['first_name']} ${studentResponse['last_name']}';
+          _studentNumber = studentResponse['id'].toString();
+        });
+      }
     } catch (e) {
       print('Error loading student profile: $e');
-      setState(() {
-        _studentName = 'Unable to load name';
-        _studentNumber = 'Unknown';
-      });
-    }
-  }
-
-  Widget buildProfileSection() {
-    return Container(
-      color: const Color(0xFFF2F8FC),
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-      child: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 40,
-              backgroundColor: Colors.grey[300],
-              backgroundImage: _profileImageUrl != null
-                  ? NetworkImage(_profileImageUrl!)
-                  : null,
-              child: _profileImageUrl == null
-                  ? const Icon(Icons.person, size: 50, color: Colors.green)
-                  : null,
-            ),
-            const SizedBox(width: 16.0),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _studentName ?? 'Loading...',
-                  style: const TextStyle(
-                    fontSize: 18.0,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 8.0),
-                Text(
-                  'Student ID: ${_studentNumber ?? 'Unknown'}',
-                  style: const TextStyle(
-                    fontSize: 16.0,
-                    color: Colors.black,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  List<Section> _previousSemesters = [];
-
-  Future<void> _loadPreviousSemesters() async {
-    try {
-      final response = await Supabase.instance.client
-          .from('student_courses')
-          .select('course:course_id (year_number, semester)')
-          .eq('student_id', widget.studentId);
-      print(response);
-
-      final courses = (response as List)
-          .map((data) => Section.fromJson(data['course']))
-          .toList();
-
-      // Remove duplicates by checking each item in the list
-      List<Section> uniqueSemesters = [];
-      for (var course in courses) {
-        bool isDuplicate = false;
-
-        for (var existing in uniqueSemesters) {
-          if (existing.yearNumber == course.yearNumber &&
-              existing.semester == course.semester) {
-            isDuplicate = true;
-            break;
-          }
-        }
-
-        if (!isDuplicate) {
-          uniqueSemesters.add(course);
-        }
+      if (mounted) {
+        setState(() {
+          _studentName = 'Unable to load name';
+          _studentNumber = 'Unknown';
+        });
       }
-
-      // Sort the unique semesters
-      uniqueSemesters.sort((a, b) {
-        if (a.yearNumber != b.yearNumber) {
-          return a.yearNumber.compareTo(b.yearNumber);
-        }
-        return a.semester.compareTo(b.semester);
-      });
-
-      setState(() {
-        _previousSemesters = uniqueSemesters;
-        _isLoading = false;
-      });
-    } catch (e) {
-      print('Error loading previous semesters: $e');
     }
   }
-
-  List<Course> _archivedCourses = [];
 
   Future<void> _loadCourses() async {
     try {
-      // Fetch the student's current year and semester
       final studentResponse = await Supabase.instance.client
           .from('students')
           .select('section:section_id (year_number, semester)')
@@ -263,7 +263,6 @@ class StudentDashboardState extends State<StudentDashboard> {
       final currentSemester =
           int.parse(studentResponse['section']['semester'].toString());
 
-      // Fetch courses
       final response = await Supabase.instance.client
           .from('student_courses')
           .select('course:course_id (id, name, code, semester, year_number)')
@@ -273,10 +272,10 @@ class StudentDashboardState extends State<StudentDashboard> {
           .map((data) => Course.fromJson(data['course']))
           .toList();
 
-      // Separate courses into active and archived
       final activeCourses = courses
-          .where((course) => (course.yearNumber == currentYear &&
-              course.semester == currentSemester))
+          .where((course) =>
+              course.yearNumber == currentYear &&
+              course.semester == currentSemester)
           .toList();
 
       final archivedCourses = courses
@@ -286,16 +285,58 @@ class StudentDashboardState extends State<StudentDashboard> {
                   course.semester < currentSemester))
           .toList();
 
-      setState(() {
-        _courses = activeCourses;
-        _archivedCourses = archivedCourses;
-        _isLoadingCourses = false;
-      });
+      if (mounted) {
+        setState(() {
+          _courses = activeCourses;
+          _archivedCourses = archivedCourses;
+          _isLoadingCourses = false;
+        });
+      }
     } catch (e) {
       print('Error loading courses: $e');
-      setState(() {
-        _isLoadingCourses = false;
+      if (mounted) {
+        setState(() {
+          _isLoadingCourses = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadPreviousSemesters() async {
+    try {
+      final response = await Supabase.instance.client
+          .from('student_courses')
+          .select('course:course_id (year_number, semester)')
+          .eq('student_id', widget.studentId);
+
+      final courses = (response as List)
+          .map((data) => Section.fromJson(data['course']))
+          .toList();
+
+      List<Section> uniqueSemesters = [];
+      for (var course in courses) {
+        if (!uniqueSemesters.any((existing) =>
+            existing.yearNumber == course.yearNumber &&
+            existing.semester == course.semester)) {
+          uniqueSemesters.add(course);
+        }
+      }
+
+      uniqueSemesters.sort((a, b) {
+        if (a.yearNumber != b.yearNumber) {
+          return a.yearNumber.compareTo(b.yearNumber);
+        }
+        return a.semester.compareTo(b.semester);
       });
+
+      if (mounted) {
+        setState(() {
+          _previousSemesters = uniqueSemesters;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading previous semesters: $e');
     }
   }
 
@@ -370,6 +411,52 @@ class StudentDashboardState extends State<StudentDashboard> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildProfileSection() {
+    return Container(
+      color: const Color(0xFFF2F8FC),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+      child: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            CircleAvatar(
+              radius: 40,
+              backgroundColor: Colors.grey[300],
+              backgroundImage: _profileImageUrl != null
+                  ? NetworkImage(_profileImageUrl!)
+                  : null,
+              child: _profileImageUrl == null
+                  ? const Icon(Icons.person, size: 50, color: Colors.green)
+                  : null,
+            ),
+            const SizedBox(width: 16.0),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _studentName ?? 'Loading...',
+                  style: const TextStyle(
+                    fontSize: 18.0,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 8.0),
+                Text(
+                  'Student ID: ${_studentNumber ?? 'Unknown'}',
+                  style: const TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -561,49 +648,6 @@ class StudentDashboardState extends State<StudentDashboard> {
       ),
     );
   }
-
-  // Profile section
-  // Widget buildProfileSection() {
-  //   return Container(
-  //     color: const Color(0xFFF2F8FC),
-  //     padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-  //     child: Center(
-  //       child: Row(
-  //         mainAxisAlignment:
-  //             MainAxisAlignment.center, // Center items within the Row
-  //         crossAxisAlignment: CrossAxisAlignment.center,
-  //         children: [
-  //           CircleAvatar(
-  //             radius: 40,
-  //             backgroundColor: Colors.grey[300],
-  //             child: const Icon(Icons.person, size: 50, color: Colors.green),
-  //           ),
-  //           const SizedBox(width: 16.0),
-  //           const Column(
-  //             crossAxisAlignment: CrossAxisAlignment.start,
-  //             children: [
-  //               Text(
-  //                 'Name: Unknown',
-  //                 style: TextStyle(
-  //                   fontSize: 18.0,
-  //                   color: Colors.black,
-  //                 ),
-  //               ),
-  //               SizedBox(height: 8.0),
-  //               Text(
-  //                 'Student ID: 12-345',
-  //                 style: TextStyle(
-  //                   fontSize: 16.0,
-  //                   color: Colors.black,
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
 
   // Widget for sections with arrows
   Widget buildSectionWithArrows({
