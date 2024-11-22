@@ -36,10 +36,9 @@ class CourseDetails extends StatelessWidget {
 
   Future<List<Map<String, dynamic>>> fetchTasks() async {
     try {
-      print(courseId);
       final response = await supabase
           .from('tasks')
-          .select('*')
+          .select('id, due_date, description, student_id, students(last_name)')
           .eq('course_id', courseId)
           .order('due_date', ascending: true);
 
@@ -241,6 +240,8 @@ class CourseDetails extends StatelessWidget {
                       final dueDate = DateTime.parse(task['due_date']);
                       final formattedDate =
                           DateFormat('MMM. dd').format(dueDate);
+                      final studentName =
+                          task['students']['last_name'] ?? 'Unknown';
 
                       return Container(
                         margin: const EdgeInsets.only(bottom: 16.0),
@@ -260,7 +261,6 @@ class CourseDetails extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Profile and student name
                             Row(
                               children: [
                                 CircleAvatar(
@@ -270,9 +270,9 @@ class CourseDetails extends StatelessWidget {
                                       color: Colors.green),
                                 ),
                                 const SizedBox(width: 8.0),
-                                const Text(
-                                  'Student Name', // Replace with actual student name
-                                  style: TextStyle(fontSize: 14.0),
+                                Text(
+                                  studentName,
+                                  style: const TextStyle(fontSize: 14.0),
                                 ),
                                 const Spacer(),
                                 Column(
@@ -290,30 +290,11 @@ class CourseDetails extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 12.0),
-
-                            // Task description
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    task['description'],
-                                    style: const TextStyle(fontSize: 14.0),
-                                  ),
-                                ),
-                                const SizedBox(width: 8.0),
-                                Container(
-                                  width: 20,
-                                  height: 20,
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[300],
-                                    borderRadius: BorderRadius.circular(4.0),
-                                  ),
-                                ),
-                              ],
+                            Text(
+                              task['description'],
+                              style: const TextStyle(fontSize: 14.0),
                             ),
                             const SizedBox(height: 16.0),
-
-                            // See Details link
                             Align(
                               alignment: Alignment.bottomRight,
                               child: GestureDetector(
@@ -323,7 +304,7 @@ class CourseDetails extends StatelessWidget {
                                     PageRouteBuilder(
                                       pageBuilder: (context, animation,
                                               secondaryAnimation) =>
-                                          DetailsPage(taskId: task['id'],),
+                                          DetailsPage(taskId: task['id']),
                                       transitionsBuilder: (context, animation,
                                           secondaryAnimation, child) {
                                         return FadeTransition(
