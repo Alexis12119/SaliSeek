@@ -13,14 +13,17 @@ import 'package:intl/intl.dart';
 // Students Table
 // INSERT INTO "public"."students" ("id", "email", "password", "last_name", "type", "section_id", "program_id", "department_id", "grade_status") VALUES ('1', 'test@gmail.com', 'test123', 'Test', 'Regular', '2', '1', '1', 'Pending'), ('2', 'corporal461@gmail.com', 'Alexis-121', 'Alexis', 'Regular', '1', '1', '1', 'Pending');
 
-// Teachers Table
-// INSERT INTO "public"."teacher" ("id", "first_name", "email", "password", "last_name", "course_id") VALUES ('1', 'Hensonn', 'henz@gmail.com', 'admin', 'Palomado', '2'), ('2', 'Audrey', 'audrey@gmail.com', 'audrey123', 'Alinea', '3');
+// Student Courses Table
+// INSERT INTO "public"."student_courses" ("student_id", "course_id", "midterm_grade", "final_grade", "year_number", "semester") VALUES ('2', '3', '5', '5', '1', '1');
 
 // College Course Table
 // INSERT INTO "public"."college_course" ("id", "name", "year_number", "code", "semester") VALUES ('1', 'Networking 2', '2', 'NET212', '2'), ('2', 'Advanced Software Development', '3', 'ITProfEL1', '1'), ('3', 'Computer Programming 1', '1', 'CC111', '1'), ('4', 'Computer Programming 2', '1', 'CC112', '2'), ('5', 'Computer Programming 3', '2', 'CC123', '1'), ('6', 'Capstone 1', '3', 'CP111', '2'), ('7', 'Teleportation 1', '4', 'TP111', '1'), ('8', 'Teleportation 2', '4', 'TP222', '2'), ('9', 'Living in the IT Era', '1', 'LITE', '1');
 
-// Student Courses Table
-// INSERT INTO "public"."student_courses" ("student_id", "course_id", "midterm_grade", "final_grade", "year_number", "semester") VALUES ('2', '3', '5', '5', '1', '1');
+// Teachers Table
+// INSERT INTO "public"."teacher" ("id", "first_name", "email", "password", "last_name") VALUES ('1', 'Hensonn', 'henz@gmail.com', 'admin', 'Palomado'), ('2', 'Audrey', 'audrey@gmail.com', 'audrey123', 'Alinea'), ('3', 'Austhin', 'aus@gmail.com', 'aus123', 'Sabater');
+
+// Teacher Courses Table
+// INSERT INTO "public"."teacher_courses" ("id", "teacher_id", "course_id") VALUES ('1', '3', '9'), ('2', '1', '2'), ('3', '2', '3');
 class CourseDetails extends StatelessWidget {
   final String title;
   final String studentId;
@@ -52,12 +55,12 @@ class CourseDetails extends StatelessWidget {
   Future<Map<String, dynamic>?> fetchInstructor() async {
     try {
       final response = await supabase
-          .from('teacher')
-          .select('first_name, last_name')
+          .from('teacher_courses')
+          .select('teacher:teacher_id(first_name, last_name)')
           .eq('course_id', courseId)
           .single();
 
-      return response;
+      return response['teacher'];
     } catch (e) {
       debugPrint('Error fetching instructor: $e');
       return null;
