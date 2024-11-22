@@ -36,6 +36,7 @@ class CourseDetails extends StatelessWidget {
 
   Future<List<Map<String, dynamic>>> fetchTasks() async {
     try {
+      print(courseId);
       final response = await supabase
           .from('tasks')
           .select('*')
@@ -322,7 +323,7 @@ class CourseDetails extends StatelessWidget {
                                     PageRouteBuilder(
                                       pageBuilder: (context, animation,
                                               secondaryAnimation) =>
-                                          const DetailsPage(),
+                                          DetailsPage(taskId: task['id'],),
                                       transitionsBuilder: (context, animation,
                                           secondaryAnimation, child) {
                                         return FadeTransition(

@@ -1,10 +1,10 @@
 import 'package:SaliSeek/submitted_file.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DetailsPage extends StatefulWidget {
-  const DetailsPage({super.key});
+  final int taskId;
+  const DetailsPage({super.key, required this.taskId});
 
   @override
   State<DetailsPage> createState() => _DetailsPageState();
@@ -30,8 +30,9 @@ class _DetailsPageState extends State<DetailsPage> {
     final response = await supabase
         .from('tasks')
         .select('due_date, description, url')
-        .eq('id', 1)
+        .eq('id', widget.taskId)
         .single();
+    print(response);
 
     setState(() {
       dueDate = response['due_date'];
@@ -46,7 +47,7 @@ class _DetailsPageState extends State<DetailsPage> {
   Future<void> _updateURL() async {
     final newUrl = urlController.text;
     if (newUrl.isNotEmpty) {
-      await supabase.from('tasks').update({'url': newUrl}).eq('id', 1);
+      await supabase.from('tasks').update({'url': newUrl}).eq('id', widget.taskId);
 
       setState(() {
         activityLink = newUrl; // Update the activity link in the state
