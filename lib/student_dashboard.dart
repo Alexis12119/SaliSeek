@@ -121,7 +121,7 @@ class StudentDashboardState extends State<StudentDashboard> {
   String? _studentNumber;
   String? _profileImageUrl;
   bool _isLoading = true;
-  List<RealtimeChannel> _subscriptions = [];
+  final List<RealtimeChannel> _subscriptions = [];
 
   @override
   void initState() {
