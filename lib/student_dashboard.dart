@@ -343,7 +343,7 @@ class StudentDashboardState extends State<StudentDashboard> {
 
               // Archived Classes Section
               buildSectionWithArrows(
-                title: 'Archived Classes:',
+                title: 'Archived Courses:',
                 scrollController: _archivedScrollController,
                 items: _isLoadingCourses
                     ? [] // Show a loading indicator when data is loading
