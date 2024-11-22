@@ -17,8 +17,8 @@ class _DetailsPageState extends State<DetailsPage> {
   String? dueDate;
   String? description;
   String? activityLink;
-  TextEditingController urlController =
-      TextEditingController(); // Controller for URL input
+  TextEditingController urlController = TextEditingController();
+  bool isPastDueDate = false; // Flag for due date check
 
   @override
   void initState() {
@@ -38,19 +38,24 @@ class _DetailsPageState extends State<DetailsPage> {
       dueDate = response['due_date'];
       description = response['description'];
       activityLink = response['url'];
-      urlController.text =
-          activityLink ?? ''; // Set the URL field with the fetched URL
+      urlController.text = activityLink ?? '';
+
+      if (dueDate != null) {
+        final parsedDueDate = DateTime.parse(dueDate!);
+        isPastDueDate = DateTime.now().isAfter(parsedDueDate);
+      }
     });
   }
 
-  // Function to update the URL in the database
   Future<void> _updateURL() async {
     final newUrl = urlController.text;
     if (newUrl.isNotEmpty) {
-      await supabase.from('tasks').update({'url': newUrl}).eq('id', widget.taskId);
+      await supabase
+          .from('tasks')
+          .update({'url': newUrl}).eq('id', widget.taskId);
 
       setState(() {
-        activityLink = newUrl; // Update the activity link in the state
+        activityLink = newUrl;
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -62,7 +67,6 @@ class _DetailsPageState extends State<DetailsPage> {
     }
   }
 
-  // Fetch task data from Supabase
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,27 +103,28 @@ class _DetailsPageState extends State<DetailsPage> {
                             fontWeight: FontWeight.bold, fontSize: 16.0),
                       ),
                       const SizedBox(height: 16.0),
-                      Container(
-                        padding: const EdgeInsets.all(12.0),
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade50,
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.warning_amber_rounded,
-                                color: Colors.red, size: 20.0),
-                            SizedBox(width: 8.0),
-                            Expanded(
-                              child: Text(
-                                'Submit before the due date to avoid penalties.',
-                                style: TextStyle(
-                                    color: Colors.red, fontSize: 14.0),
+                      if (isPastDueDate)
+                        Container(
+                          padding: const EdgeInsets.all(12.0),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade50,
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.warning_amber_rounded,
+                                  color: Colors.red, size: 20.0),
+                              SizedBox(width: 8.0),
+                              Expanded(
+                                child: Text(
+                                  'The submission period has ended. You can no longer submit a URL.',
+                                  style: TextStyle(
+                                      color: Colors.red, fontSize: 14.0),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
                       const SizedBox(height: 24.0),
                       const Text(
                         'Task Description',
@@ -132,20 +137,31 @@ class _DetailsPageState extends State<DetailsPage> {
                         style: const TextStyle(fontSize: 14.0),
                       ),
                       const SizedBox(height: 24.0),
-
-                      // URL Input Section (for students to set their own link)
                       const Text(
                         'Set Your Activity Submission URL:',
                         style: TextStyle(
                             fontSize: 16.0, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8.0),
-                      TextField(
-                        controller: urlController,
-                        decoration: InputDecoration(
-                          hintText: 'Enter your URL here',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
+                      GestureDetector(
+                        onTap: isPastDueDate
+                            ? null
+                            : () {
+                                FocusScope.of(context)
+                                    .requestFocus(FocusNode());
+                              },
+                        child: AbsorbPointer(
+                          absorbing: isPastDueDate,
+                          child: TextField(
+                            controller: urlController,
+                            decoration: InputDecoration(
+                              hintText: isPastDueDate
+                                  ? 'Submission closed (Past due date)'
+                                  : 'Enter your URL here',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -153,7 +169,7 @@ class _DetailsPageState extends State<DetailsPage> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _updateURL,
+                          onPressed: isPastDueDate ? null : _updateURL,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF2C9B44),
                             padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -161,9 +177,9 @@ class _DetailsPageState extends State<DetailsPage> {
                               borderRadius: BorderRadius.circular(8.0),
                             ),
                           ),
-                          child: const Text(
-                            'Submit URL',
-                            style: TextStyle(
+                          child: Text(
+                            isPastDueDate ? 'Submission Closed' : 'Submit URL',
+                            style: const TextStyle(
                               fontSize: 16.0,
                               color: Color(0xFFF2F8FC),
                             ),
