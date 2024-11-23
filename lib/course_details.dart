@@ -1,9 +1,3 @@
-import 'package:SaliSeek/details_page.dart';
-import 'package:SaliSeek/module_tile.dart';
-import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:intl/intl.dart';
-
 // Modules Table
 // INSERT INTO "public"."modules" ("id", "name", "course_id", "url") VALUES ('1', 'Module 1(ITProfEL2)', '2', 'https://google.com'), ('2', 'Module 1(CC111)', '3', 'https://google.com');
 
@@ -24,106 +18,335 @@ import 'package:intl/intl.dart';
 
 // Teacher Courses Table
 // INSERT INTO "public"."teacher_courses" ("id", "teacher_id", "course_id") VALUES ('1', '3', '9'), ('2', '1', '2'), ('3', '2', '3');
-class CourseDetails extends StatelessWidget {
+import 'package:SaliSeek/details_page.dart';
+import 'package:SaliSeek/module_tile.dart';
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart';
+
+class CourseDetails extends StatefulWidget {
   final String title;
   final String studentId;
   final String courseId;
 
-  CourseDetails(
-      {super.key,
-      required this.title,
-      required this.studentId,
-      required this.courseId});
+  const CourseDetails({
+    super.key,
+    required this.title,
+    required this.studentId,
+    required this.courseId,
+  });
 
+  @override
+  CourseDetailsState createState() => CourseDetailsState();
+}
+
+class CourseDetailsState extends State<CourseDetails> {
   final supabase = Supabase.instance.client;
+  final ScrollController moduleScrollController = ScrollController();
+  final List<RealtimeChannel> _subscriptions = [];
 
-  Future<List<Map<String, dynamic>>> fetchTasks() async {
+  // State variables
+  List<Map<String, dynamic>>? _tasks;
+  List<Map<String, dynamic>>? _modules;
+  Map<String, dynamic>? _teacher;
+
+  // Loading state flags
+  bool _isLoadingTasks = true;
+  bool _isLoadingModules = true;
+  bool _isLoadingTeacher = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInitialData();
+    _setupRealtimeSubscriptions();
+  }
+
+  Future<void> _loadInitialData() async {
+    // Load all data in parallel
+    await Future.wait([
+      fetchTasks(),
+      fetchModules(),
+      fetchInstructor(),
+    ]);
+  }
+
+  @override
+  void dispose() {
+    for (var subscription in _subscriptions) {
+      subscription.unsubscribe();
+    }
+    moduleScrollController.dispose();
+    super.dispose();
+  }
+
+  void _setupRealtimeSubscriptions() {
+    final teacherCoursesChannel = supabase
+        .channel('teacher_courses_changes')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'teacher',
+          callback: (payload) => fetchInstructor(),
+        )
+        .subscribe();
+
+    final tasksChannel = supabase
+        .channel('tasks_changes')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'tasks',
+          callback: (payload) => fetchTasks(),
+        )
+        .subscribe();
+
+    final modulesChannel = supabase
+        .channel('modules_changes')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'modules',
+          callback: (payload) => fetchModules(),
+        )
+        .subscribe();
+
+    _subscriptions
+        .addAll([teacherCoursesChannel, tasksChannel, modulesChannel]);
+  }
+
+  Future<void> fetchTasks() async {
+    if (!mounted) return;
+
+    setState(() => _isLoadingTasks = true);
     try {
       final response = await supabase
           .from('tasks')
           .select(
               'id, due_date, description, student_id, students(first_name,last_name)')
-          .eq('course_id', courseId)
+          .eq('course_id', widget.courseId)
           .order('due_date', ascending: true);
 
-      return List<Map<String, dynamic>>.from(response);
+      if (mounted) {
+        setState(() {
+          _tasks = List<Map<String, dynamic>>.from(response);
+          _isLoadingTasks = false;
+        });
+      }
     } catch (e) {
       debugPrint('Error fetching tasks: $e');
-      return [];
+      if (mounted) {
+        setState(() => _isLoadingTasks = false);
+      }
     }
   }
 
-  Future<Map<String, dynamic>?> fetchInstructor() async {
+  Future<void> fetchInstructor() async {
+    if (!mounted) return;
+
+    setState(() => _isLoadingTeacher = true);
     try {
       final response = await supabase
           .from('teacher_courses')
           .select('teacher:teacher_id(first_name, last_name)')
-          .eq('course_id', courseId)
-          .single();
+          .eq('course_id', widget.courseId)
+          .maybeSingle();
 
-      return response['teacher'];
+      if (mounted) {
+        setState(() {
+          _teacher = response?['teacher'];
+          _isLoadingTeacher = false;
+        });
+      }
     } catch (e) {
       debugPrint('Error fetching instructor: $e');
-      return null;
+      if (mounted) {
+        setState(() => _isLoadingTeacher = false);
+      }
     }
   }
 
-  Future<List<Map<String, dynamic>>> fetchModules() async {
+  Future<void> fetchModules() async {
+    if (!mounted) return;
+
+    setState(() => _isLoadingModules = true);
     try {
-      final response =
-          await supabase.from('modules').select('*').eq('course_id', courseId);
-      return List<Map<String, dynamic>>.from(response);
+      final response = await supabase
+          .from('modules')
+          .select('*')
+          .eq('course_id', widget.courseId);
+
+      if (mounted) {
+        setState(() {
+          _modules = List<Map<String, dynamic>>.from(response);
+          _isLoadingModules = false;
+        });
+      }
     } catch (e) {
       debugPrint('Error fetching modules: $e');
-      return [];
+      if (mounted) {
+        setState(() => _isLoadingModules = false);
+      }
     }
   }
 
-  Widget buildSectionWithArrows({
-    required ScrollController scrollController,
-  }) {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: fetchModules(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
+  Widget buildModulesSection() {
+    if (_isLoadingModules) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
+    if (_modules == null || _modules!.isEmpty) {
+      return const Center(child: Text('No modules available'));
+    }
 
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No modules available'));
-        }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 100,
+          child: Row(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  controller: moduleScrollController,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _modules!.length,
+                  itemBuilder: (context, index) {
+                    final module = _modules![index];
+                    return ModuleTile(
+                      module['name'],
+                      url: module['url'],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 
-        final modules = snapshot.data!;
+  Widget buildInstructorSection() {
+    if (_isLoadingTeacher) {
+      return const Text(
+        'Loading...',
+        style: TextStyle(fontSize: 18.0),
+      );
+    }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: 100,
-              child: Row(
+    if (_teacher == null) {
+      return const Text(
+        'Instructor: Unknown',
+        style: TextStyle(fontSize: 18.0),
+      );
+    }
+
+    final fullName = '${_teacher!['first_name']} ${_teacher!['last_name']}';
+    return Text(
+      'Instructor: $fullName',
+      style: const TextStyle(fontSize: 18.0),
+    );
+  }
+
+  Widget buildTasksSection() {
+    if (_isLoadingTasks) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_tasks == null || _tasks!.isEmpty) {
+      return const Center(child: Text('No tasks available'));
+    }
+
+    return ListView.builder(
+      itemCount: _tasks!.length,
+      itemBuilder: (context, index) {
+        final task = _tasks![index];
+        final dueDate = DateTime.parse(task['due_date']);
+        final formattedDate = DateFormat('MMM. dd').format(dueDate);
+        final studentName =
+            '${task['students']['first_name']} ${task['students']['last_name']}';
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16.0),
+          padding: const EdgeInsets.all(12.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                spreadRadius: 1,
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  Expanded(
-                    child: ListView.builder(
-                      controller: scrollController,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: modules.length,
-                      itemBuilder: (context, index) {
-                        final module = modules[index];
-                        return ModuleTile(
-                          module['name'],
-                          url: module['url'],
-                        );
-                      },
-                    ),
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Colors.grey[300],
+                    child: const Icon(Icons.person, color: Colors.green),
+                  ),
+                  const SizedBox(width: 8.0),
+                  Text(
+                    studentName,
+                    style: const TextStyle(fontSize: 14.0),
+                  ),
+                  const Spacer(),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Due ($formattedDate)',
+                        style: const TextStyle(
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ),
-          ],
+              const SizedBox(height: 12.0),
+              Text(
+                task['description'],
+                style: const TextStyle(fontSize: 14.0),
+              ),
+              const SizedBox(height: 16.0),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            DetailsPage(taskId: task['id']),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          return FadeTransition(
+                              opacity: animation, child: child);
+                        },
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'See Details',
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      color: Colors.black,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
@@ -131,8 +354,6 @@ class CourseDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ScrollController moduleScrollController = ScrollController();
-
     return Scaffold(
       backgroundColor: const Color(0xFFF2F8FC),
       body: SafeArea(
@@ -142,7 +363,7 @@ class CourseDetails extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                title,
+                widget.title,
                 style: const TextStyle(
                   fontSize: 24.0,
                   fontWeight: FontWeight.bold,
@@ -159,33 +380,7 @@ class CourseDetails extends StatelessWidget {
                       const Icon(Icons.person, size: 20, color: Colors.green),
                 ),
                 const SizedBox(width: 8.0),
-                FutureBuilder<Map<String, dynamic>?>(
-                  future: fetchInstructor(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Text(
-                        'Loading...',
-                        style: TextStyle(fontSize: 18.0),
-                      );
-                    }
-
-                    if (snapshot.hasError || snapshot.data == null) {
-                      return const Text(
-                        'Instructor: Unknown',
-                        style: TextStyle(fontSize: 18.0),
-                      );
-                    }
-
-                    final instructor = snapshot.data!;
-                    final fullName =
-                        '${instructor['first_name']} ${instructor['last_name']}';
-
-                    return Text(
-                      'Instructor: $fullName',
-                      style: const TextStyle(fontSize: 18.0),
-                    );
-                  },
-                ),
+                buildInstructorSection(),
               ],
             ),
             const Padding(
@@ -196,145 +391,25 @@ class CourseDetails extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16.0),
-            buildSectionWithArrows(
-              scrollController: moduleScrollController,
-            ),
-            Expanded(child: buildTasksAndActivities()),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget buildTasksAndActivities() {
-    return Container(
-      color: const Color(0xFFF2F8FC),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Tasks and Activities:',
-              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16.0),
+            buildModulesSection(),
             Expanded(
-              child: FutureBuilder<List<Map<String, dynamic>>>(
-                future: fetchTasks(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  }
-
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('No tasks available'));
-                  }
-
-                  final tasks = snapshot.data!;
-
-                  return ListView.builder(
-                    itemCount: tasks.length,
-                    itemBuilder: (context, index) {
-                      final task = tasks[index];
-                      final dueDate = DateTime.parse(task['due_date']);
-                      final formattedDate =
-                          DateFormat('MMM. dd').format(dueDate);
-                      final studentName = task['students']['first_name'] +
-                              ' ' +
-                              task['students']['last_name'] ??
-                          'Unknown';
-
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 16.0),
-                        padding: const EdgeInsets.all(12.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.2),
-                              spreadRadius: 1,
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 20,
-                                  backgroundColor: Colors.grey[300],
-                                  child: const Icon(Icons.person,
-                                      color: Colors.green),
-                                ),
-                                const SizedBox(width: 8.0),
-                                Text(
-                                  studentName,
-                                  style: const TextStyle(fontSize: 14.0),
-                                ),
-                                const Spacer(),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      'Due ($formattedDate)',
-                                      style: const TextStyle(
-                                        fontSize: 12.0,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12.0),
-                            Text(
-                              task['description'],
-                              style: const TextStyle(fontSize: 14.0),
-                            ),
-                            const SizedBox(height: 16.0),
-                            Align(
-                              alignment: Alignment.bottomRight,
-                              child: GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    PageRouteBuilder(
-                                      pageBuilder: (context, animation,
-                                              secondaryAnimation) =>
-                                          DetailsPage(taskId: task['id']),
-                                      transitionsBuilder: (context, animation,
-                                          secondaryAnimation, child) {
-                                        return FadeTransition(
-                                            opacity: animation, child: child);
-                                      },
-                                    ),
-                                  );
-                                },
-                                child: const Text(
-                                  'See Details',
-                                  style: TextStyle(
-                                    fontSize: 14.0,
-                                    color: Colors.black,
-                                    decoration: TextDecoration.underline,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                },
+              child: Container(
+                color: const Color(0xFFF2F8FC),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Tasks and Activities:',
+                        style: TextStyle(
+                            fontSize: 20.0, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 16.0),
+                      Expanded(child: buildTasksSection()),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],
