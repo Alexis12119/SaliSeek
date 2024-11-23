@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:SaliSeek/course_tile.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-// Students Table
-// INSERT INTO "public"."students" ("id", "email", "password", "last_name", "type", "section_id", "program_id", "department_id", "grade_status") VALUES ('1', 'test@gmail.com', 'test123', 'Test', 'Regular', '2', '1', '1', 'Pending'), ('2', 'corporal461@gmail.com', 'Alexis-121', 'Alexis', 'Regular', '1', '1', '1', 'Pending');
 
 // Teachers Table
-// INSERT INTO "public"."teacher" ("id", "first_name", "email", "password", "last_name", "course_id") VALUES ('1', 'Hensonn', 'henz@gmail.com', 'admin', 'Palomado', '2'), ('2', 'Audrey', 'audrey@gmail.com', 'audrey123', 'Alinea', '3');
+// INSERT INTO "public"."teacher" ("id", "first_name", "email", "password", "last_name") VALUES ('1', 'Hensonn', 'henz@gmail.com', 'admin', 'Palomado'), ('2', 'Audrey', 'audrey@gmail.com', 'audrey123', 'Alinea');
 
 // College Course Table
 // INSERT INTO "public"."college_course" ("id", "name", "year_number", "code", "semester") VALUES ('1', 'Networking 2', '2', 'NET212', '2'), ('2', 'Advanced Software Development', '3', 'ITProfEL1', '1'), ('3', 'Computer Programming 1', '1', 'CC111', '2'), ('4', 'Computer Programming 2', '1', 'CC112', '2'), ('5', 'Computer Programming 3', '2', 'CC123', '1'), ('6', 'Capstone 1', '3', 'CP111', '2'), ('7', 'Teleportation 1', '4', 'TP111', '1'), ('8', 'Teleportation 2', '4', 'TP222', '2'), ('9', 'Living in the IT Era', '1', 'LITE', '1');
@@ -39,8 +37,13 @@ class ViewGradeDetails extends StatefulWidget {
   final int yearNumber;
   final int semester;
 
-  const ViewGradeDetails(
-      {super.key, required this.title, required this.studentId, required this.yearNumber, required this.semester});
+  const ViewGradeDetails({
+    super.key,
+    required this.title,
+    required this.studentId,
+    required this.yearNumber,
+    required this.semester,
+  });
 
   @override
   ViewGradeDetailsState createState() => ViewGradeDetailsState();
@@ -48,16 +51,61 @@ class ViewGradeDetails extends StatefulWidget {
 
 class ViewGradeDetailsState extends State<ViewGradeDetails> {
   final supabase = Supabase.instance.client;
+  final List<RealtimeChannel> _subscriptions = [];
 
-  late Future<List<Course>> futureCourses;
+  List<Course>? _courses;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    futureCourses = fetchCourses();
+    _loadInitialData();
+    _setupRealtimeSubscriptions();
   }
 
-  Future<List<Course>> fetchCourses() async {
+  @override
+  void dispose() {
+    for (var subscription in _subscriptions) {
+      subscription.unsubscribe();
+    }
+    super.dispose();
+  }
+
+  Future<void> _loadInitialData() async {
+    await fetchCourses();
+  }
+
+  void _setupRealtimeSubscriptions() {
+    // Subscribe to student_courses changes
+    final studentCoursesChannel = supabase
+        .channel('student_courses_changes')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'student_courses',
+          callback: (payload) => fetchCourses(),
+        )
+        .subscribe();
+
+    // Subscribe to college_course changes
+    final collegeCoursesChannel = supabase
+        .channel('college_courses_changes')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'college_course',
+          callback: (payload) => fetchCourses(),
+        )
+        .subscribe();
+
+    _subscriptions.addAll([studentCoursesChannel, collegeCoursesChannel]);
+  }
+
+  Future<void> fetchCourses() async {
+    if (!mounted) return;
+
+    setState(() => _isLoading = true);
+
     try {
       // Fetch all courses for the specified year and semester
       final courseResponse = await supabase
@@ -66,8 +114,14 @@ class ViewGradeDetailsState extends State<ViewGradeDetails> {
           .eq('year_number', widget.yearNumber)
           .eq('semester', widget.semester);
 
+      if (!mounted) return;
+
       if (courseResponse.isEmpty) {
-        return [];
+        setState(() {
+          _courses = [];
+          _isLoading = false;
+        });
+        return;
       }
 
       // Fetch all existing student_courses for the student
@@ -75,6 +129,8 @@ class ViewGradeDetailsState extends State<ViewGradeDetails> {
           .from('student_courses')
           .select('course_id, midterm_grade')
           .eq('student_id', widget.studentId);
+
+      if (!mounted) return;
 
       final Map<int, dynamic> studentCoursesMap = {
         for (var course in studentCoursesResponse) course['course_id']: course
@@ -102,6 +158,8 @@ class ViewGradeDetailsState extends State<ViewGradeDetails> {
                 'course_id': courseId,
                 'midterm_grade': 5.00,
                 'final_grade': 5.00,
+                'year_number': widget.yearNumber,
+                'semester': widget.semester,
               })
               .select('course_id, midterm_grade')
               .maybeSingle();
@@ -116,11 +174,43 @@ class ViewGradeDetailsState extends State<ViewGradeDetails> {
         }
       }
 
-      return courses;
+      if (mounted) {
+        setState(() {
+          _courses = courses;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       debugPrint('Error fetching courses: $e');
-      return [];
+      if (mounted) {
+        setState(() {
+          _courses = [];
+          _isLoading = false;
+        });
+      }
     }
+  }
+
+  Widget buildCoursesList() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_courses == null || _courses!.isEmpty) {
+      return const Center(child: Text('No courses found'));
+    }
+
+    return ListView.builder(
+      itemCount: _courses!.length,
+      itemBuilder: (context, index) {
+        final course = _courses![index];
+        return CourseTile(
+          courseCode: course.courseCode,
+          courseName: course.courseTitle,
+          midtermGrade: course.midtermGrade,
+        );
+      },
+    );
   }
 
   @override
@@ -131,10 +221,7 @@ class ViewGradeDetailsState extends State<ViewGradeDetails> {
           color: const Color(0xFFF2F8FC),
           child: Column(
             children: [
-              // Retain the header
               buildHeader(context),
-
-              // Title of the selected semester
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
@@ -145,40 +232,7 @@ class ViewGradeDetailsState extends State<ViewGradeDetails> {
                   ),
                 ),
               ),
-
-              // List of course tiles with course name and grades
-              Expanded(
-                child: FutureBuilder<List<Course>>(
-                  future: futureCourses,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Center(
-                        child: Text('Error: ${snapshot.error}'),
-                      );
-                    } else if (snapshot.data == null ||
-                        snapshot.data!.isEmpty) {
-                      return const Center(
-                        child: Text('No courses found'),
-                      );
-                    }
-
-                    final courses = snapshot.data!;
-                    return ListView.builder(
-                      itemCount: courses.length,
-                      itemBuilder: (context, index) {
-                        final course = courses[index];
-                        return CourseTile(
-                          courseCode: course.courseCode,
-                          courseName: course.courseTitle,
-                          midtermGrade: course.midtermGrade,
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
+              Expanded(child: buildCoursesList()),
             ],
           ),
         ),
