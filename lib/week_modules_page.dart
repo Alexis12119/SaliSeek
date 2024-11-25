@@ -98,6 +98,16 @@ class _WeekModulesPageState extends State<WeekModulesPage> {
             children: [
               buildHeader(context),
               Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(
+                  widget.weekName,
+                  style: const TextStyle(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
                   controller: _searchController,
@@ -110,6 +120,7 @@ class _WeekModulesPageState extends State<WeekModulesPage> {
                   ),
                 ),
               ),
+              // Display the selected week
             ],
           ),
 
