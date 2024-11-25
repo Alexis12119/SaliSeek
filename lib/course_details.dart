@@ -1,5 +1,8 @@
+// Week Table
+// INSERT INTO "public"."week" ("id", "name") VALUES ('1', 'Week 1'), ('2', 'Week 2'), ('3', 'Week 3'), ('4', 'Week 4'), ('5', 'Week 5'), ('6', 'Week 6'), ('7', 'Week 7'), ('8', 'Week 8'), ('9', 'Week 9');
+
 // Modules Table
-// INSERT INTO "public"."modules" ("id", "name", "course_id", "url") VALUES ('1', 'Module 1(ITProfEL2)', '2', 'https://google.com'), ('2', 'Module 1(CC111)', '3', 'https://google.com');
+// INSERT INTO "public"."modules" ("id", "name", "course_id", "url", "teacher_id", "week") VALUES ('1', 'Module 1', '9', 'https://google.com', null, null), ('2', 'Module 1', '3', 'https://google.com', '2', '1'), ('3', 'Module 2', '3', 'www.google.com', '2', '1'), ('4', 'Module 3', '3', 'www.google.com', '2', '1');
 
 // Tasks Table
 // INSERT INTO "public"."tasks" ("id", "due_date", "description", "url", "student_id", "course_id") VALUES ('1', '2024-11-23', 'This is the description', null, '2', '3');
@@ -23,6 +26,7 @@ import 'package:SaliSeek/module_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CourseDetails extends StatefulWidget {
   final String title;
@@ -49,7 +53,7 @@ class CourseDetailsState extends State<CourseDetails> {
   List<Map<String, dynamic>>? _tasks;
   List<Map<String, dynamic>>? _modules;
   Map<String, dynamic>? _teacher;
-
+  final Map<String, List<Map<String, dynamic>>> _weekModules = {};
   // Loading state flags
   bool _isLoadingTasks = true;
   bool _isLoadingModules = true;
@@ -162,30 +166,6 @@ class CourseDetailsState extends State<CourseDetails> {
       debugPrint('Error fetching instructor: $e');
       if (mounted) {
         setState(() => _isLoadingTeacher = false);
-      }
-    }
-  }
-
-  Future<void> fetchModules() async {
-    if (!mounted) return;
-
-    setState(() => _isLoadingModules = true);
-    try {
-      final response = await supabase
-          .from('modules')
-          .select('*')
-          .eq('course_id', widget.courseId);
-
-      if (mounted) {
-        setState(() {
-          _modules = List<Map<String, dynamic>>.from(response);
-          _isLoadingModules = false;
-        });
-      }
-    } catch (e) {
-      debugPrint('Error fetching modules: $e');
-      if (mounted) {
-        setState(() => _isLoadingModules = false);
       }
     }
   }
@@ -352,6 +332,119 @@ class CourseDetailsState extends State<CourseDetails> {
     );
   }
 
+  Future<void> fetchModules() async {
+    if (!mounted) return;
+
+    setState(() => _isLoadingModules = true);
+    try {
+      final response = await supabase
+          .from('modules')
+          .select('*, week:week(id, name)')
+          .eq('course_id', widget.courseId)
+          .order('week');
+
+      if (mounted) {
+        setState(() {
+          _modules = List<Map<String, dynamic>>.from(response);
+          _organizeModulesByWeek();
+          _isLoadingModules = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching modules: $e');
+      if (mounted) {
+        setState(() => _isLoadingModules = false);
+      }
+    }
+  }
+
+  void _organizeModulesByWeek() {
+    _weekModules.clear();
+    for (var module in _modules ?? []) {
+      if (module['week'] != null) {
+        final weekId = module['week']['id'].toString();
+        _weekModules.putIfAbsent(weekId, () => []);
+        _weekModules[weekId]!.add(module);
+      }
+    }
+  }
+
+  Widget buildWeeksSection() {
+    if (_isLoadingModules) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_weekModules.isEmpty) {
+      return const Center(child: Text('No modules available'));
+    }
+
+    return SizedBox(
+      height: 100,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: _weekModules.length,
+        itemBuilder: (context, index) {
+          final weekId = _weekModules.keys.elementAt(index);
+          final modules = _weekModules[weekId]!;
+          final weekName = modules.first['week']['name'];
+
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => WeekModulesPage(
+                      weekName: weekName,
+                      modules: modules,
+                    ),
+                  ),
+                );
+              },
+              child: Container(
+                width: 120,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.2),
+                      spreadRadius: 1,
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.calendar_today, color: Colors.green),
+                    const SizedBox(height: 8),
+                    Text(
+                      weekName,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '${modules.length} modules',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -386,12 +479,12 @@ class CourseDetailsState extends State<CourseDetails> {
             const Padding(
               padding: EdgeInsets.only(top: 16.0, bottom: 0.0),
               child: Text(
-                'Learning Materials:',
+                'Weekly Materials:',
                 style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(height: 16.0),
-            buildModulesSection(),
+            buildWeeksSection(),
             Expanded(
               child: Container(
                 color: const Color(0xFFF2F8FC),
@@ -403,7 +496,9 @@ class CourseDetailsState extends State<CourseDetails> {
                       const Text(
                         'Tasks and Activities:',
                         style: TextStyle(
-                            fontSize: 20.0, fontWeight: FontWeight.bold),
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 16.0),
                       Expanded(child: buildTasksSection()),
@@ -414,6 +509,175 @@ class CourseDetailsState extends State<CourseDetails> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget buildHeader(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double fontSize = screenWidth < 600 ? 10.0 : 18.0;
+    double subtitleFontSize =
+        screenWidth < 600 ? 9.0 : 12.0; // Subtitle font size
+    double padding = screenWidth < 600 ? 12.0 : 16.0;
+    double iconSize = screenWidth < 600 ? 15.0 : 20.0;
+    double iconPadding = screenWidth < 600 ? 0.0 : 8.0;
+    double logoSize = screenWidth < 600 ? 20.0 : 30.0;
+
+    return Container(
+      color: const Color(0xFF2C9B44),
+      padding: EdgeInsets.all(padding),
+      child: Row(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(iconPadding),
+            child: IconButton(
+              iconSize: iconSize,
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ),
+          SizedBox(width: screenWidth < 600 ? 2.0 : 6.0),
+
+          // Logo
+          CircleAvatar(
+            radius: logoSize,
+            backgroundColor: const Color(0xFFF2F8FC),
+            backgroundImage: const AssetImage('assets/images/plsp.jpg'),
+          ),
+
+          const SizedBox(width: 8.0),
+
+          // Column for Title and Subtitle
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Pamantasan ng Lungsod ng San Pablo',
+                  style: TextStyle(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4.0), // Space between title and subtitle
+
+                // Subtitle details
+                Text(
+                  'Brgy. San Jose, San Pablo City',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                    color: const Color(0xFFF2F8FC),
+                  ),
+                ),
+                Text(
+                  'Tel No: (049) 536-7380',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                    color: const Color(0xFFF2F8FC),
+                  ),
+                ),
+                Text(
+                  'Email Address: plspofficial@plsp.edu.ph',
+                  style: TextStyle(
+                    fontSize: subtitleFontSize,
+                    color: const Color(0xFFF2F8FC),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class WeekModulesPage extends StatelessWidget {
+  final String weekName;
+  final List<Map<String, dynamic>> modules;
+
+  const WeekModulesPage({
+    super.key,
+    required this.weekName,
+    required this.modules,
+  });
+
+  Future<void> _launchURL(BuildContext context, String? url) async {
+    if (url == null || url.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No URL available for this module'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    String formattedUrl = url;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      formattedUrl = 'https://$url';
+    }
+
+    try {
+      final Uri uri = Uri.parse(formattedUrl);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not launch the URL'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error launching URL: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          // Custom header
+          buildHeader(context),
+
+          // Module list
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: modules.length,
+              itemBuilder: (context, index) {
+                final module = modules[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  child: ListTile(
+                    leading: const Icon(Icons.book, color: Colors.green),
+                    title: Text(module['name']),
+                    trailing: module['url'] != null
+                        ? const Icon(Icons.launch, color: Colors.green)
+                        : null,
+                    onTap: () => _launchURL(context, module['url']),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
