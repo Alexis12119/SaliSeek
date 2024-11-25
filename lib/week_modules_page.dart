@@ -93,7 +93,6 @@ class _WeekModulesPageState extends State<WeekModulesPage> {
     return Scaffold(
       body: Column(
         children: [
-          // Custom header with search field
           Column(
             children: [
               buildHeader(context),
