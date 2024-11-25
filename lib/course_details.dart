@@ -1,6 +1,5 @@
 // Week Table
 // INSERT INTO "public"."week" ("id", "name") VALUES ('1', 'Week 1'), ('2', 'Week 2'), ('3', 'Week 3'), ('4', 'Week 4'), ('5', 'Week 5'), ('6', 'Week 6'), ('7', 'Week 7'), ('8', 'Week 8'), ('9', 'Week 9');
-
 // Modules Table
 // INSERT INTO "public"."modules" ("id", "name", "course_id", "url", "teacher_id", "week") VALUES ('1', 'Module 1', '9', 'https://google.com', null, null), ('2', 'Module 1', '3', 'https://google.com', '2', '1'), ('3', 'Module 2', '3', 'www.google.com', '2', '1'), ('4', 'Module 3', '3', 'www.google.com', '2', '1');
 
@@ -23,6 +22,7 @@
 // INSERT INTO "public"."teacher_courses" ("id", "teacher_id", "course_id") VALUES ('1', '3', '9'), ('2', '1', '2'), ('3', '2', '3');
 import 'package:SaliSeek/details_page.dart';
 import 'package:SaliSeek/module_tile.dart';
+import 'package:SaliSeek/week_modules_page.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
@@ -596,171 +596,4 @@ class CourseDetailsState extends State<CourseDetails> {
   }
 }
 
-class WeekModulesPage extends StatelessWidget {
-  final String weekName;
-  final List<Map<String, dynamic>> modules;
 
-  const WeekModulesPage({
-    super.key,
-    required this.weekName,
-    required this.modules,
-  });
-
-  Future<void> _launchURL(BuildContext context, String? url) async {
-    if (url == null || url.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No URL available for this module'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    String formattedUrl = url;
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      formattedUrl = 'https://$url';
-    }
-
-    try {
-      final Uri uri = Uri.parse(formattedUrl);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Could not launch the URL'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error launching URL: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          // Custom header
-          buildHeader(context),
-
-          // Module list
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: modules.length,
-              itemBuilder: (context, index) {
-                final module = modules[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  child: ListTile(
-                    leading: const Icon(Icons.book, color: Colors.green),
-                    title: Text(module['name']),
-                    trailing: module['url'] != null
-                        ? const Icon(Icons.launch, color: Colors.green)
-                        : null,
-                    onTap: () => _launchURL(context, module['url']),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget buildHeader(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double fontSize = screenWidth < 600 ? 10.0 : 18.0;
-    double subtitleFontSize =
-        screenWidth < 600 ? 9.0 : 12.0; // Subtitle font size
-    double padding = screenWidth < 600 ? 12.0 : 16.0;
-    double iconSize = screenWidth < 600 ? 15.0 : 20.0;
-    double iconPadding = screenWidth < 600 ? 0.0 : 8.0;
-    double logoSize = screenWidth < 600 ? 20.0 : 30.0;
-
-    return Container(
-      color: const Color(0xFF2C9B44),
-      padding: EdgeInsets.all(padding),
-      child: Row(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(iconPadding),
-            child: IconButton(
-              iconSize: iconSize,
-              icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ),
-          SizedBox(width: screenWidth < 600 ? 2.0 : 6.0),
-
-          // Logo
-          CircleAvatar(
-            radius: logoSize,
-            backgroundColor: const Color(0xFFF2F8FC),
-            backgroundImage: const AssetImage('assets/images/plsp.jpg'),
-          ),
-
-          const SizedBox(width: 8.0),
-
-          // Column for Title and Subtitle
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Pamantasan ng Lungsod ng San Pablo',
-                  style: TextStyle(
-                    fontSize: fontSize,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4.0), // Space between title and subtitle
-
-                // Subtitle details
-                Text(
-                  'Brgy. San Jose, San Pablo City',
-                  style: TextStyle(
-                    fontSize: subtitleFontSize,
-                    color: const Color(0xFFF2F8FC),
-                  ),
-                ),
-                Text(
-                  'Tel No: (049) 536-7380',
-                  style: TextStyle(
-                    fontSize: subtitleFontSize,
-                    color: const Color(0xFFF2F8FC),
-                  ),
-                ),
-                Text(
-                  'Email Address: plspofficial@plsp.edu.ph',
-                  style: TextStyle(
-                    fontSize: subtitleFontSize,
-                    color: const Color(0xFFF2F8FC),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
