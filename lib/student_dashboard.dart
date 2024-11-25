@@ -622,7 +622,9 @@ class StudentDashboardState extends State<StudentDashboard> {
                         child: const Text('No',
                             style: TextStyle(color: Colors.black)),
                         onPressed: () {
-                          Navigator.of(context).pop(); // Close the dialog
+                          MaterialPageRoute(
+                            builder: (context) => const LoginPage(),
+                          );
                         },
                       ),
                       TextButton(
