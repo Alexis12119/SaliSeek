@@ -15,11 +15,13 @@ class Course {
   final String courseCode;
   final String courseTitle;
   final String midtermGrade;
+  final String status;
 
   Course({
     required this.courseCode,
     required this.courseTitle,
     required this.midtermGrade,
+    required this.status,
   });
 
   factory Course.fromJson(Map<String, dynamic> json) {
@@ -27,6 +29,7 @@ class Course {
       courseCode: json['course_code'].toString(),
       courseTitle: json['course_title'].toString(),
       midtermGrade: json['midterm_grade'].toString(),
+      status: json['status'].toString(),
     );
   }
 }
@@ -107,7 +110,6 @@ class ViewGradeDetailsState extends State<ViewGradeDetails> {
     setState(() => _isLoading = true);
 
     try {
-      // Fetch all courses for the specified year and semester
       final courseResponse = await supabase
           .from('college_course')
           .select('id, name, code, year_number, semester')
@@ -124,10 +126,9 @@ class ViewGradeDetailsState extends State<ViewGradeDetails> {
         return;
       }
 
-      // Fetch all existing student_courses for the student
       final studentCoursesResponse = await supabase
           .from('student_courses')
-          .select('course_id, midterm_grade')
+          .select('course_id, midterm_grade, status')
           .eq('student_id', widget.studentId);
 
       if (!mounted) return;
@@ -142,15 +143,20 @@ class ViewGradeDetailsState extends State<ViewGradeDetails> {
         final courseId = courseData['id'];
 
         if (studentCoursesMap.containsKey(courseId)) {
-          // If the course exists in student_courses
           final studentCourse = studentCoursesMap[courseId];
+          final status = studentCourse['status'];
+          final midtermGrade =
+              (status == 'Approved' && studentCourse['midterm_grade'] != null)
+                  ? studentCourse['midterm_grade'].toString()
+                  : 'Pending';
+
           courses.add(Course(
             courseCode: courseData['code'].toString(),
             courseTitle: courseData['name'].toString(),
-            midtermGrade: studentCourse['midterm_grade'].toString(),
+            midtermGrade: midtermGrade,
+            status: status,
           ));
         } else {
-          // Insert the course into student_courses with default grades
           final insertResponse = await supabase
               .from('student_courses')
               .insert({
@@ -160,8 +166,9 @@ class ViewGradeDetailsState extends State<ViewGradeDetails> {
                 'final_grade': 5.00,
                 'year_number': widget.yearNumber,
                 'semester': widget.semester,
+                'status': 'Pending',
               })
-              .select('course_id, midterm_grade')
+              .select('course_id, midterm_grade, status')
               .maybeSingle();
 
           if (insertResponse != null) {
@@ -169,6 +176,7 @@ class ViewGradeDetailsState extends State<ViewGradeDetails> {
               courseCode: courseData['code'].toString(),
               courseTitle: courseData['name'].toString(),
               midtermGrade: insertResponse['midterm_grade'].toString(),
+              status: insertResponse['status'].toString(),
             ));
           }
         }
@@ -204,10 +212,20 @@ class ViewGradeDetailsState extends State<ViewGradeDetails> {
       itemCount: _courses!.length,
       itemBuilder: (context, index) {
         final course = _courses![index];
+
+        final String midtermGradeDisplay;
+        // Check if grade is pending
+        if (course.status == 'Pending') {
+          midtermGradeDisplay = "Pending";
+        } else {
+          midtermGradeDisplay = course.midtermGrade;
+        }
+
         return CourseTile(
           courseCode: course.courseCode,
           courseName: course.courseTitle,
-          midtermGrade: course.midtermGrade,
+          midtermGrade: midtermGradeDisplay, // Pass the conditional value here
+          status: course.status,
         );
       },
     );

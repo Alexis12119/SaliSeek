@@ -4,27 +4,23 @@ class CourseTile extends StatelessWidget {
   final String courseCode;
   final String courseName;
   final String midtermGrade;
+  final String status;
 
   const CourseTile({
     super.key,
     required this.courseCode,
     required this.courseName,
     required this.midtermGrade,
+    required this.status,
   });
 
-
   String formatGrade(String grade) {
-    // If the grade is already in the desired format, return it
-    if (grade.contains('.')) {
-      // If it's already a decimal like 1.25, keep it as is
-      if (grade.split('.')[1].length > 2) return grade;
-      
-      // If it's a whole number or has one decimal place, format to two decimal places
-      return double.parse(grade).toStringAsFixed(2);
+    // If the grade is "Pending", return that text
+    if (grade.isEmpty) {
+      return 'Pending';
     }
-    
-    // If it's a whole number, convert to two decimal places
-    return double.parse(grade).toStringAsFixed(2);
+
+    return grade;
   }
 
   @override
