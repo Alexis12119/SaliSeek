@@ -5,6 +5,7 @@ import 'package:SaliSeek/semester_tile.dart';
 import 'package:SaliSeek/view_grade_details.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/material.dart';
+
 // Students Table
 // INSERT INTO "public"."students" ("id", "email", "password", "last_name", "type", "section_id", "program_id", "department_id", "grade_status") VALUES ('1', 'test@gmail.com', 'test123', 'Test', 'Regular', '2', '1', '1', 'Pending'), ('2', 'corporal461@gmail.com', 'Alexis-121', 'Alexis', 'Regular', '1', '1', '1', 'Pending');
 
@@ -15,7 +16,11 @@ import 'package:flutter/material.dart';
 // INSERT INTO "public"."college_course" ("id", "name", "year_number", "code", "semester") VALUES ('1', 'Networking 2', '2', 'NET212', '2'), ('2', 'Advanced Software Development', '3', 'ITProfEL1', '1'), ('3', 'Computer Programming 1', '1', 'CC111', '2'), ('4', 'Computer Programming 2', '1', 'CC112', '2'), ('5', 'Computer Programming 3', '2', 'CC123', '1'), ('6', 'Capstone 1', '3', 'CP111', '2'), ('7', 'Teleportation 1', '4', 'TP111', '1'), ('8', 'Teleportation 2', '4', 'TP222', '2'), ('9', 'Living in the IT Era', '1', 'LITE', '1');
 
 // Student Courses Table
-// INSERT INTO "public"."student_courses" ("student_id", "course_id", "midterm_grade") VALUES ('2', '3', '5'), ('2', '4', '5'), ('2', '9', '5');
+// INSERT INTO "public"."student_courses" ("student_id", "course_id", "midterm_grade", "status", "id") VALUES ('2', '3', '5.00', 'Pending', '3'), ('2', '4', '5.00', 'Approved', '2'), ('2', '9', '5.00', 'Pending', '1');
+
+// Section Coures Table
+// INSERT INTO "public"."section_courses" ("id", "section_id", "course_id") VALUES ('1', '1', '3'), ('2', '2', '5'), ('3', '2', '4'), ('4', '1', '4'), ('5', '4', '9'), ('6', '3', '6');
+
 class Course {
   final String id;
   final String name;
@@ -339,8 +344,6 @@ class StudentDashboardState extends State<StudentDashboard> {
       print('Error loading previous semesters: $e');
     }
   }
-
-// INSERT INTO "public"."student_courses" ("student_id", "course_id", "midterm_grade", "final_grade", "year_number", "semester") VALUES ('2', '3', '5', '5', '', ''), ('2', '4', '5', '5', '', ''), ('2', '9', '5', '5', '', '');
 
   @override
   Widget build(BuildContext context) {

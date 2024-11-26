@@ -7,7 +7,7 @@
 // INSERT INTO "public"."tasks" ("id", "due_date", "description", "url", "student_id", "course_id") VALUES ('1', '2024-11-23', 'This is the description', null, '2', '3');
 
 // Students Table
-// INSERT INTO "public"."students" ("id", "email", "password", "last_name", "type", "section_id", "program_id", "department_id", "grade_status") VALUES ('1', 'test@gmail.com', 'test123', 'Test', 'Regular', '2', '1', '1', 'Pending'), ('2', 'corporal461@gmail.com', 'Alexis-121', 'Alexis', 'Regular', '1', '1', '1', 'Pending');
+// INSERT INTO "public"."students" ("id", "email", "password", "last_name", "section_id", "program_id", "department_id", "first_name") VALUES ('1', 'test@gmail.com', 'test123', 'Manalo', '2', '1', '1', 'Jiro'), ('2', 'corporal461@gmail.com', 'Alexis-121', 'Corporal ', '1', '1', '1', 'Alexis'), ('3', 'kim@gmail.com', 'kim123', 'Caguite', '1', '1', '1', 'Kim'), ('5', 'hello@gmail.com', '123', 'World', '1', '1', '1', 'Hello'), ('6', 'dugong@gmail.com', '123', 'Black', '2', '1', '1', 'Dugong'), ('7', 'john@gmail.com', '123', 'Doe', '3', '1', '1', 'John');
 
 // Student Courses Table
 // INSERT INTO "public"."student_courses" ("student_id", "course_id", "midterm_grade", "final_grade", "year_number", "semester") VALUES ('2', '3', '5', '5', '1', '1');
@@ -129,6 +129,7 @@ class CourseDetailsState extends State<CourseDetails> {
               'id, due_date, description, student_id, students(first_name,last_name)')
           .eq('course_id', widget.courseId)
           .order('due_date', ascending: true);
+      print(response);
 
       if (mounted) {
         setState(() {
@@ -594,5 +595,3 @@ class CourseDetailsState extends State<CourseDetails> {
     );
   }
 }
-
-
