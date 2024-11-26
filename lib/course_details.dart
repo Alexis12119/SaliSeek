@@ -4,7 +4,7 @@
 // INSERT INTO "public"."modules" ("id", "name", "course_id", "url", "teacher_id", "week") VALUES ('1', 'Module 1', '9', 'https://google.com', null, null), ('2', 'Module 1', '3', 'https://google.com', '2', '1'), ('3', 'Module 2', '3', 'www.google.com', '2', '1'), ('4', 'Module 3', '3', 'www.google.com', '2', '1');
 
 // Tasks Table
-// INSERT INTO "public"."tasks" ("id", "due_date", "description", "url", "student_id", "course_id") VALUES ('1', '2024-11-23', 'This is the description', null, '2', '3');
+// INSERT INTO "public"."tasks" ("id", "due_date", "description", "url", "student_id", "course_id", "drive", "youtube", "file", "status", "grade", "date_passed") VALUES ('1', '2024-11-23', 'This is the description', 'jiro', '2', '3', null, null, null, '', '', '2024-11-22'), ('2', '2024-11-30', 'This is the second description', 'haha', '2', '4', null, null, null, '', '', '2024-11-26'), ('3', '2024-11-21', 'This is the description', 'google.com', '2', '9', null, null, null, '', '', '2024-11-20'), ('4', '2024-11-30', 'Bad Description', 'sir hensonn beke nemen', '5', '3', null, null, null, '', '', '2024-11-27');
 
 // Students Table
 // INSERT INTO "public"."students" ("id", "email", "password", "last_name", "section_id", "program_id", "department_id", "first_name") VALUES ('1', 'test@gmail.com', 'test123', 'Manalo', '2', '1', '1', 'Jiro'), ('2', 'corporal461@gmail.com', 'Alexis-121', 'Corporal ', '1', '1', '1', 'Alexis'), ('3', 'kim@gmail.com', 'kim123', 'Caguite', '1', '1', '1', 'Kim'), ('5', 'hello@gmail.com', '123', 'World', '1', '1', '1', 'Hello'), ('6', 'dugong@gmail.com', '123', 'Black', '2', '1', '1', 'Dugong'), ('7', 'john@gmail.com', '123', 'Doe', '3', '1', '1', 'John');
@@ -128,6 +128,7 @@ class CourseDetailsState extends State<CourseDetails> {
           .select(
               'id, due_date, description, student_id, students(first_name,last_name)')
           .eq('course_id', widget.courseId)
+          .eq('student_id', widget.studentId)
           .order('due_date', ascending: true);
       print(response);
 

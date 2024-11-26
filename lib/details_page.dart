@@ -2,6 +2,8 @@ import 'package:SaliSeek/submitted_file.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+// Tasks Table
+// INSERT INTO "public"."tasks" ("id", "due_date", "description", "url", "student_id", "course_id", "drive", "youtube", "file", "status", "grade", "date_passed") VALUES ('1', '2024-11-23', 'This is the description', 'jiro', '2', '3', null, null, null, '', '', '2024-11-22'), ('2', '2024-11-30', 'This is the second description', 'haha', '2', '4', null, null, null, '', '', '2024-11-26'), ('3', '2024-11-21', 'This is the description', 'google.com', '2', '9', null, null, null, '', '', '2024-11-20'), ('4', '2024-11-30', 'Bad Description', 'sir hensonn beke nemen', '5', '3', null, null, null, '', '', '2024-11-27');
 class DetailsPage extends StatefulWidget {
   final int taskId;
   const DetailsPage({super.key, required this.taskId});
@@ -47,25 +49,31 @@ class _DetailsPageState extends State<DetailsPage> {
     });
   }
 
-  Future<void> _updateURL() async {
-    final newUrl = urlController.text;
-    if (newUrl.isNotEmpty) {
-      await supabase
-          .from('tasks')
-          .update({'url': newUrl}).eq('id', widget.taskId);
+Future<void> _updateURL() async {
+  final newUrl = urlController.text;
+  if (newUrl.isNotEmpty) {
+    // Get the current timestamp
+    final submissionDate = DateTime.now().toIso8601String();
 
-      setState(() {
-        activityLink = newUrl;
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('URL updated successfully!'),
-              backgroundColor: Color(0xFF2C9B44)),
-        );
-      }
+    // Update the database with the new URL and submission date
+    await supabase
+        .from('tasks')
+        .update({'url': newUrl, 'date_passed': submissionDate}).eq('id', widget.taskId);
+
+    setState(() {
+      activityLink = newUrl;
+    });
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('URL updated successfully!'),
+          backgroundColor: Color(0xFF2C9B44),
+        ),
+      );
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {
