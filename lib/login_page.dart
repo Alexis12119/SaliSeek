@@ -220,26 +220,26 @@ class _LoginPageState extends State<LoginPage> {
                           Center(
                             child: Column(
                               children: [
-                                TextButton(
-                                  onPressed: _isLoading
-                                      ? null
-                                      : () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const VerifyStudentIdPage(),
-                                            ),
-                                          );
-                                        },
-                                  child: const Text(
-                                    "Don't have an account? Sign Up",
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
+                                // TextButton(
+                                //   onPressed: _isLoading
+                                //       ? null
+                                //       : () {
+                                //           Navigator.push(
+                                //             context,
+                                //             MaterialPageRoute(
+                                //               builder: (context) =>
+                                //                   const VerifyStudentIdPage(),
+                                //             ),
+                                //           );
+                                //         },
+                                //   child: const Text(
+                                //     "Don't have an account? Sign Up",
+                                //     style: TextStyle(
+                                //       color: Colors.black,
+                                //       fontSize: 14,
+                                //     ),
+                                //   ),
+                                // ),
                                 TextButton(
                                   onPressed: _isLoading
                                       ? null
