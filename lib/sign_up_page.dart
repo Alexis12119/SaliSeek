@@ -158,7 +158,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           ),
                           const SizedBox(height: 4.0),
                           TextFormField(
-                            controller: _lastNameController,
+                            controller: _firstNameController,
                             decoration: const InputDecoration(
                               hintText: 'Enter your First Name',
                               border: OutlineInputBorder(),
