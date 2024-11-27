@@ -112,13 +112,13 @@ class _VerifyStudentIdPageState extends State<VerifyStudentIdPage> {
                                       );
                                     } else {
                                       //   // Student ID exists, navigate to SignUpPage
-                                      //   Navigator.push(
-                                      //     context,
-                                      //     MaterialPageRoute(
-                                      //         builder: (context) =>
-                                      //             const SignUpPage()),
-                                      //   );
-                                      // }
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const SignUpPage()),
+                                        );
+                                      }
                                     }
                                   } catch (e) {
                                     // Handle any errors from Supabase
