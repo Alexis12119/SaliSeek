@@ -118,7 +118,6 @@ class _VerifyStudentIdPageState extends State<VerifyStudentIdPage> {
                                               builder: (context) =>
                                                   const SignUpPage()),
                                         );
-                                      }
                                     }
                                   } catch (e) {
                                     // Handle any errors from Supabase
