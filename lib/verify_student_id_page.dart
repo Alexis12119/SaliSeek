@@ -95,12 +95,22 @@ class _VerifyStudentIdPageState extends State<VerifyStudentIdPage> {
                                     // Query the 'students' table for the student ID
                                     final response = await supabase
                                         .from('students')
-                                        .select('id')
+                                        .select('id, first_name, last_name')
                                         .eq('id', _studentIdController.text)
                                         .maybeSingle(); // Fetch a single result, or null if none
                                     print(response);
 
-                                    if (response == null) {
+                                    if (response!['first_name'] != null ||
+                                        response['last_name'] != null) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              "It's already verified, Please login"),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    } else if (response['id'] == null) {
                                       // Student ID does not exist
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
@@ -111,13 +121,14 @@ class _VerifyStudentIdPageState extends State<VerifyStudentIdPage> {
                                         ),
                                       );
                                     } else {
-                                      // Student ID exists, navigate to SignUpPage
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                const SignUpPage()),
-                                      );
+                                      //   // Student ID exists, navigate to SignUpPage
+                                      //   Navigator.push(
+                                      //     context,
+                                      //     MaterialPageRoute(
+                                      //         builder: (context) =>
+                                      //             const SignUpPage()),
+                                      //   );
+                                      // }
                                     }
                                   } catch (e) {
                                     // Handle any errors from Supabase
