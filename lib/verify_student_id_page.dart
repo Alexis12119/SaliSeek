@@ -100,17 +100,7 @@ class _VerifyStudentIdPageState extends State<VerifyStudentIdPage> {
                                         .maybeSingle(); // Fetch a single result, or null if none
                                     print(response);
 
-                                    if (response!['first_name'] != null ||
-                                        response['last_name'] != null) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                              "It's already verified, Please login"),
-                                          backgroundColor: Colors.red,
-                                        ),
-                                      );
-                                    } else if (response['id'] == null) {
+                                    if (response!['id'] == null) {
                                       // Student ID does not exist
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
