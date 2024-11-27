@@ -1,4 +1,5 @@
 import 'package:SaliSeek/login_page.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:SaliSeek/sign_up_page.dart';
 import 'package:flutter/material.dart';
 
@@ -87,14 +88,44 @@ class _VerifyStudentIdPageState extends State<VerifyStudentIdPage> {
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                 ),
-                                onPressed: () {
-                                  if (_formKey.currentState!.validate()) {
-                                    // If validated, navigate to SignUpPage
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const SignUpPage()),
+                                onPressed: () async {
+                                  final supabase = Supabase.instance.client;
+
+                                  try {
+                                    // Query the 'students' table for the student ID
+                                    final response = await supabase
+                                        .from('students')
+                                        .select('id')
+                                        .eq('id', _studentIdController.text)
+                                        .maybeSingle(); // Fetch a single result, or null if none
+                                    print(response);
+
+                                    if (response == null) {
+                                      // Student ID does not exist
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content:
+                                              Text('Student ID does not exist'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    } else {
+                                      // Student ID exists, navigate to SignUpPage
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const SignUpPage()),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    // Handle any errors from Supabase
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('An error occurred: $e'),
+                                        backgroundColor: Colors.red,
+                                      ),
                                     );
                                   }
                                 },
@@ -115,8 +146,7 @@ class _VerifyStudentIdPageState extends State<VerifyStudentIdPage> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) =>
-                                          const LoginPage()),
+                                      builder: (context) => const LoginPage()),
                                 );
                               },
                               child: const Text(
@@ -157,8 +187,7 @@ class _VerifyStudentIdPageState extends State<VerifyStudentIdPage> {
           CircleAvatar(
             radius: avatarSize,
             backgroundColor: const Color(0xFFF2F8FC),
-            backgroundImage:
-                const AssetImage('assets/images/plsp.jpg'), 
+            backgroundImage: const AssetImage('assets/images/plsp.jpg'),
           ),
           SizedBox(width: spacing),
           Expanded(
